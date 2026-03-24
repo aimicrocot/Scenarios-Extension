@@ -1,10 +1,8 @@
 {
-    "display_name": "Multiple Scenarios",
-    "description": "Добавляет возможность создавать несколько сценариев для персонажа с переключателями и подстановкой в промт.",
-    "author": "YourName",
+    "name": "multiple-scenarios",
+    "display_name": "Scenario Manager",
     "version": "1.0.0",
-    "license": "MIT",
-    "type": "extension",
-    "main": "index.js",
-    "style": "style.css"
+    "description": "Управление множественными сценариями для персонажа.",
+    "author": "User",
+    "js_file": "index.js"
 }
