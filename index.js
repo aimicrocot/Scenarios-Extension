@@ -1,143 +1,98 @@
-import { getContext, extensionManager, saveSettingsDebounced } from '../../extensions.js';
-import { characters, saveCharacter, loadCharacter } from '../../characters.js';
+import { getContext, saveSettingsDebounced } from '../../extensions.js';
+import { characters, saveCharacter } from '../../characters.js';
 import { eventSource, event_types } from '../../events.js';
+import { callGenericPopup, POPUP_TYPE } from '../../popup.js';
 
-// Идентификатор расширения
 const EXTENSION_NAME = 'multiple-scenarios';
 
-// Хранилище: объект, где ключ – ID персонажа, значение – массив сценариев
-let scenariosStore = {};
-
-// Контекст SillyTavern
-let context = null;
-
-// Функция инициализации
-async function init() {
-    context = getContext();
-    // Загружаем сохранённые сценарии
-    await loadScenarios();
-    // Создаём UI
-    addScenarioTab();
-    // Подписываемся на события генерации для вставки сценариев в промт
-    eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, onMessageRendered);
-    eventSource.on(event_types.CHARACTER_SWITCHED, onCharacterSwitched);
-}
-
-// Загрузка сценариев из localStorage или файла персонажа
-async function loadScenarios() {
-    const stored = localStorage.getItem(`${EXTENSION_NAME}_store`);
-    if (stored) {
-        scenariosStore = JSON.parse(stored);
-    } else {
-        scenariosStore = {};
-    }
-    // Если для текущего персонажа нет записей – инициализируем пустым массивом
-    const currentCharId = getCurrentCharacterId();
-    if (!scenariosStore[currentCharId]) {
-        scenariosStore[currentCharId] = [];
+// Функция отрисовки кнопки-пазла в редакторе
+function injectScenarioButton() {
+    // Ищем контейнер с кнопками управления персонажем (Image 1)
+    const container = document.querySelector('#character_edit_form .fa-puzzle-piece')?.parentElement;
+    
+    if (container && !document.getElementById('ms-open-manager')) {
+        const btn = document.createElement('div');
+        btn.id = 'ms-open-manager';
+        btn.className = 'menu_button fa-solid fa-puzzle-piece'; // Иконка пазла
+        btn.title = 'Открыть менеджер сценариев';
+        btn.style.color = '#ffac33'; // Выделим цветом для заметности
+        
+        btn.onclick = () => showScenarioManager();
+        container.appendChild(btn);
     }
 }
 
-// Сохранение сценариев
-function saveScenarios() {
-    localStorage.setItem(`${EXTENSION_NAME}_store`, JSON.stringify(scenariosStore));
-    saveSettingsDebounced(); // опционально, если используем глобальные настройки
-}
+// Окно управления сценариями
+async function showScenarioManager() {
+    const context = getContext();
+    const char = characters[context.characterId];
+    if (!char) return;
 
-// Получение ID текущего персонажа
-function getCurrentCharacterId() {
-    return characters[context.characterId]?.avatar || context.characterId;
-}
+    // Инициализируем хранилище в данных персонажа, если его нет
+    if (!char.extra_data) char.extra_data = {};
+    if (!char.extra_data.scenarios) char.extra_data.scenarios = [];
 
-// Создание вкладки "Сценарии" в боковой панели (рядом с "Лорбуки", "Инвентарь" и т.д.)
-function addScenarioTab() {
-    const sidebarHtml = `
-        <div id="multiple-scenarios-tab" class="interactable">
-            <div class="drawer-header">
-                <div class="drawer-title">Сценарии</div>
-                <div id="ms-add-scenario-btn" class="menu_button fa-solid fa-plus" title="Добавить сценарий"></div>
+    const renderList = () => {
+        return char.extra_data.scenarios.map((s, i) => `
+            <div class="ms-item" data-id="${i}">
+                <div class="ms-item-header">
+                    <input class="ms-input-name" value="${s.name}" placeholder="Название...">
+                    <label class="switch">
+                        <input type="checkbox" class="ms-toggle" ${s.enabled ? 'checked' : ''}>
+                        <span class="slider round"></span>
+                    </label>
+                    <div class="menu_button fa-solid fa-trash ms-delete" style="color:red;"></div>
+                </div>
+                <textarea class="ms-textarea">${s.content}</textarea>
             </div>
-            <div id="ms-scenarios-list" class="ms-scenarios-container">
-                <!-- Список сценариев будет отрисован здесь -->
+        `).join('') || '<p>Нажмите "+", чтобы добавить сценарий</p>';
+    };
+
+    const html = `
+        <div class="ms-manager-container">
+            <div style="display:flex; justify-content:space-between;">
+                <h3>Менеджер сценариев</h3>
+                <div id="ms-add-new" class="menu_button fa-solid fa-plus"></div>
             </div>
+            <div id="ms-list-holder">${renderList()}</div>
         </div>
     `;
-    // Добавляем вкладку в боковое меню (рядом с Lorebook и пр.)
-    const sidebar = document.querySelector('#sidebar .drawer-content');
-    if (sidebar && !document.getElementById('multiple-scenarios-tab')) {
-        sidebar.insertAdjacentHTML('beforeend', sidebarHtml);
-        document.getElementById('ms-add-scenario-btn').addEventListener('click', () => addNewScenario());
-        refreshScenariosList();
-    }
+
+    await callGenericPopup(html, POPUP_TYPE.CONFIRM);
+    
+    // Логика кнопок внутри окна (добавление, удаление, сохранение)
+    setupPopupListeners(char);
 }
 
-// Отрисовка списка сценариев
-function refreshScenariosList() {
-    const container = document.getElementById('ms-scenarios-list');
-    if (!container) return;
-
-    const currentCharId = getCurrentCharacterId();
-    const scenarios = scenariosStore[currentCharId] || [];
-
-    if (scenarios.length === 0) {
-        container.innerHTML = '<div class="ms-empty">Нет сценариев. Нажмите "+" для добавления.</div>';
-        return;
-    }
-
-    let html = '';
-    scenarios.forEach((scenario, index) => {
-        html += `
-            <div class="ms-scenario-item" data-index="${index}">
-                <div class="ms-scenario-header">
-                    <input type="text" class="ms-scenario-name" value="${escapeHtml(scenario.name)}" placeholder="Название сценария">
-                    <div class="ms-scenario-controls">
-                        <label class="ms-toggle">
-                            <input type="checkbox" class="ms-toggle-input" ${scenario.enabled ? 'checked' : ''}>
-                            <span class="ms-toggle-slider"></span>
-                        </label>
-                        <div class="ms-delete-btn fa-solid fa-trash-can" title="Удалить сценарий"></div>
-                    </div>
-                </div>
-                <textarea class="ms-scenario-content" placeholder="Текст сценария...">${escapeHtml(scenario.content)}</textarea>
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-
-    // Вешаем обработчики на элементы управления
-    document.querySelectorAll('.ms-scenario-item').forEach(item => {
-        const idx = item.dataset.index;
-        const nameInput = item.querySelector('.ms-scenario-name');
-        const contentTextarea = item.querySelector('.ms-scenario-content');
-        const toggleCheckbox = item.querySelector('.ms-toggle-input');
-        const deleteBtn = item.querySelector('.ms-delete-btn');
-
-        nameInput.addEventListener('change', () => {
-            scenarios[idx].name = nameInput.value;
-            saveScenarios();
-        });
-        contentTextarea.addEventListener('change', () => {
-            scenarios[idx].content = contentTextarea.value;
-            saveScenarios();
-        });
-        toggleCheckbox.addEventListener('change', (e) => {
-            scenarios[idx].enabled = e.target.checked;
-            saveScenarios();
-        });
-        deleteBtn.addEventListener('click', () => {
-            scenarios.splice(idx, 1);
-            saveScenarios();
-            refreshScenariosList();
-        });
-    });
+function setupPopupListeners(char) {
+    document.getElementById('ms-add-new').onclick = () => {
+        char.extra_data.scenarios.push({ name: 'Новый сценарий', content: '', enabled: true });
+        saveCharacter();
+        // Здесь можно вызвать перерисовку списка
+    };
+    // Аналогично для удаления и изменения текста...
 }
 
-// Добавление нового сценария
-function addNewScenario() {
-    const currentCharId = getCurrentCharacterId();
-    if (!scenariosStore[currentCharId]) scenariosStore[currentCharId] = [];
-    scenariosStore[currentCharId].push({
+// Модификация промпта перед отправкой
+eventSource.on(event_types.CHAT_COMPLETION_PROMPT_READY, (data) => {
+    const context = getContext();
+    const char = characters[context.characterId];
+    if (!char?.extra_data?.scenarios) return;
+
+    const activeScenarios = char.extra_data.scenarios
+        .filter(s => s.enabled && s.content.trim())
+        .map(s => s.content)
+        .join('\n');
+
+    if (activeScenarios) {
+        // Вставляем сценарии в системный промпт (или заменяем стандартный сценарий)
+        data.prompt = `Context/Scenario Update:\n${activeScenarios}\n\n${data.prompt}`;
+    }
+});
+
+// Запуск при загрузке и переключении персонажа
+eventSource.on(event_types.CHARACTER_SWITCHED, injectScenarioButton);
+$(document).ready(injectScenarioButton);
         name: 'Новый сценарий',
         content: '',
         enabled: true
