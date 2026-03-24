@@ -1,132 +1,130 @@
-/* Стили для вкладки в карточке персонажа */
-.scenario-manager-tab {
+/* Вкладка Сценарии */
+#multiple-scenarios-tab {
     padding: 10px;
 }
-.scenario-manager-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.scenario-stats {
-    font-size: 0.9em;
-    color: var(--SmartThemeBodyColor);
-    text-align: center;
-}
 
-/* Модальное окно */
-.scenario-manager-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-}
-.scenario-manager-modal .modal-content {
-    background: var(--SmartThemeBodyBg);
-    color: var(--SmartThemeBodyColor);
-    border-radius: 8px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 80%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-}
-.scenario-manager-modal .modal-header {
+.drawer-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--SmartThemeBorderColor);
-    background: var(--SmartThemeBg);
-}
-.scenario-manager-modal .modal-header h2 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-.scenario-manager-modal .close-modal-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--SmartThemeBodyColor);
-}
-.scenario-manager-modal .scenarios-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-}
-.scenario-item {
-    background: var(--black30a);
-    border: 1px solid var(--SmartThemeBorderColor);
-    border-radius: 4px;
     margin-bottom: 12px;
-    padding: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
 }
-.scenario-header {
+
+.ms-scenarios-container {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.ms-scenario-item {
+    background: #2a2a2a;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.ms-scenario-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
-.scenario-title {
+
+.ms-scenario-name {
+    flex: 1;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    color: #e0e0e0;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.ms-scenario-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex: 1;
+    gap: 10px;
 }
-.scenario-toggle {
-    margin: 0;
-    width: 18px;
-    height: 18px;
+
+/* Toggle switch (тумблер) */
+.ms-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
 }
-.scenario-name {
-    flex: 1;
-    background: var(--SmartThemeInputBg);
-    border: 1px solid var(--SmartThemeBorderColor);
-    color: var(--SmartThemeBodyColor);
-    padding: 4px 8px;
-    border-radius: 4px;
+
+.ms-toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
-.scenario-delete {
-    background: none;
-    border: none;
+
+.ms-toggle-slider {
+    position: absolute;
     cursor: pointer;
-    font-size: 1.2rem;
-    color: var(--SmartThemeBodyColor);
-    padding: 0 4px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition: 0.3s;
+    border-radius: 34px;
 }
-.scenario-delete:hover {
-    color: #ff4444;
+
+.ms-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
 }
-.scenario-content {
+
+.ms-toggle-input:checked + .ms-toggle-slider {
+    background-color: #4caf50;
+}
+
+.ms-toggle-input:checked + .ms-toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.ms-delete-btn {
+    color: #ff6b6b;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: 0.2s;
+}
+
+.ms-delete-btn:hover {
+    color: #ff3b3b;
+    transform: scale(1.05);
+}
+
+.ms-scenario-content {
     width: 100%;
-    background: var(--SmartThemeInputBg);
-    border: 1px solid var(--SmartThemeBorderColor);
-    color: var(--SmartThemeBodyColor);
+    background: #1e1e1e;
+    border: 1px solid #444;
+    color: #ddd;
+    border-radius: 4px;
+    padding: 8px;
     font-family: monospace;
     resize: vertical;
-    padding: 6px;
-    border-radius: 4px;
-    box-sizing: border-box;
+    min-height: 100px;
+    font-size: 0.9em;
 }
-.empty-message {
+
+.ms-empty {
     text-align: center;
+    color: #aaa;
     padding: 20px;
-    color: var(--SmartThemeBodyColor);
-    opacity: 0.7;
-}
-.scenario-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--SmartThemeBorderColor);
-    background: var(--SmartThemeBg);
+    font-style: italic;
 }
