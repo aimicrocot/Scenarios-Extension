@@ -1,14 +1,20 @@
-/* Контейнер для списка сценариев в окне */
-.ms-manager-container {
+/* Стиль кнопки-пазла */
+#ms-open-manager {
+    color: #ffac33 !important; /* Оранжевый цвет для выделения */
+    cursor: pointer;
+}
+
+/* Контейнер списка в окне */
+.ms-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     padding: 10px;
 }
 
 .ms-item {
-    background: var(--black75);
-    border: 1px solid var(--grey60);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #555;
     border-radius: 8px;
     padding: 10px;
 }
@@ -17,25 +23,30 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
-/* Стилизация под лорбук (Image 3) */
 .ms-input-name {
-    background: var(--black50);
-    color: var(--white);
-    border: 1px solid var(--grey40);
-    border-radius: 4px;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
     padding: 4px 8px;
+    border-radius: 4px;
     width: 60%;
 }
 
 .ms-textarea {
     width: 100%;
     min-height: 80px;
-    background: var(--black25);
-    color: var(--white);
-    border: 1px solid var(--grey40);
+    background: #111;
+    color: #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     resize: vertical;
+    font-family: inherit;
+}
+
+.ms-delete-btn {
+    color: #ff5555;
+    cursor: pointer;
 }
