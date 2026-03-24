@@ -3,141 +3,93 @@ import { characters, saveCharacter } from '../../characters.js';
 import { eventSource, event_types } from '../../events.js';
 import { callGenericPopup, POPUP_TYPE } from '../../popup.js';
 
-const EXTENSION_NAME = 'multiple-scenarios';
-
-// Функция отрисовки кнопки-пазла в редакторе
-function injectScenarioButton() {
-    // Ищем контейнер с кнопками управления персонажем (Image 1)
-    const container = document.querySelector('#character_edit_form .fa-puzzle-piece')?.parentElement;
+// 1. Функция вставки кнопки в ряд управления персонажем
+function injectPuzzleButton() {
+    // Ищем контейнер с кнопками (тот самый ряд со звездочкой и черепом)
+    const buttonRow = document.querySelector('.character_details_buttons');
     
-    if (container && !document.getElementById('ms-open-manager')) {
+    if (buttonRow && !document.getElementById('ms-open-manager')) {
         const btn = document.createElement('div');
         btn.id = 'ms-open-manager';
         btn.className = 'menu_button fa-solid fa-puzzle-piece'; // Иконка пазла
-        btn.title = 'Открыть менеджер сценариев';
-        btn.style.color = '#ffac33'; // Выделим цветом для заметности
+        btn.title = 'Менеджер сценариев';
         
-        btn.onclick = () => showScenarioManager();
-        container.appendChild(btn);
+        // Вставляем кнопку в начало ряда
+        buttonRow.prepend(btn);
+        btn.addEventListener('click', () => showScenarioManager());
     }
 }
 
-// Окно управления сценариями
+// 2. Окно менеджера сценариев
 async function showScenarioManager() {
     const context = getContext();
     const char = characters[context.characterId];
     if (!char) return;
 
-    // Инициализируем хранилище в данных персонажа, если его нет
+    // Инициализируем данные в персонаже, если их нет
     if (!char.extra_data) char.extra_data = {};
     if (!char.extra_data.scenarios) char.extra_data.scenarios = [];
 
+    const scenarios = char.extra_data.scenarios;
+
     const renderList = () => {
-        return char.extra_data.scenarios.map((s, i) => `
+        return scenarios.map((s, i) => `
             <div class="ms-item" data-id="${i}">
                 <div class="ms-item-header">
-                    <input class="ms-input-name" value="${s.name}" placeholder="Название...">
-                    <label class="switch">
+                    <input class="ms-input-name" value="${s.name}" data-field="name">
+                    <div style="display:flex; gap:10px; align-items:center;">
                         <input type="checkbox" class="ms-toggle" ${s.enabled ? 'checked' : ''}>
-                        <span class="slider round"></span>
-                    </label>
-                    <div class="menu_button fa-solid fa-trash ms-delete" style="color:red;"></div>
+                        <i class="fa-solid fa-trash-can ms-delete-btn" title="Удалить"></i>
+                    </div>
                 </div>
-                <textarea class="ms-textarea">${s.content}</textarea>
+                <textarea class="ms-textarea" data-field="content">${s.content}</textarea>
             </div>
-        `).join('') || '<p>Нажмите "+", чтобы добавить сценарий</p>';
+        `).join('') || '<p>Нажмите "+", чтобы добавить новый сценарий.</p>';
     };
 
-    const html = `
-        <div class="ms-manager-container">
-            <div style="display:flex; justify-content:space-between;">
-                <h3>Менеджер сценариев</h3>
-                <div id="ms-add-new" class="menu_button fa-solid fa-plus"></div>
+    const popupHtml = `
+        <div class="ms-container">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Сценарии</h3>
+                <div id="ms-add-btn" class="menu_button fa-solid fa-plus" title="Добавить"></div>
             </div>
-            <div id="ms-list-holder">${renderList()}</div>
+            <div id="ms-list">${renderList()}</div>
         </div>
     `;
 
-    await callGenericPopup(html, POPUP_TYPE.CONFIRM);
-    
-    // Логика кнопок внутри окна (добавление, удаление, сохранение)
-    setupPopupListeners(char);
+    await callGenericPopup(popupHtml, POPUP_TYPE.CONFIRM);
+    saveCharacter(); // Сохраняем изменения при закрытии
 }
 
-function setupPopupListeners(char) {
-    document.getElementById('ms-add-new').onclick = () => {
-        char.extra_data.scenarios.push({ name: 'Новый сценарий', content: '', enabled: true });
-        saveCharacter();
-        // Здесь можно вызвать перерисовку списка
-    };
-    // Аналогично для удаления и изменения текста...
-}
-
-// Модификация промпта перед отправкой
+// 3. Обработка событий промпта (отправка сценариев ИИ)
 eventSource.on(event_types.CHAT_COMPLETION_PROMPT_READY, (data) => {
     const context = getContext();
     const char = characters[context.characterId];
     if (!char?.extra_data?.scenarios) return;
 
-    const activeScenarios = char.extra_data.scenarios
+    // Собираем все включенные сценарии
+    const activeText = char.extra_data.scenarios
         .filter(s => s.enabled && s.content.trim())
         .map(s => s.content)
-        .join('\n');
+        .join('\n\n');
 
-    if (activeScenarios) {
-        // Вставляем сценарии в системный промпт (или заменяем стандартный сценарий)
-        data.prompt = `Context/Scenario Update:\n${activeScenarios}\n\n${data.prompt}`;
+    if (activeText) {
+        // Вставляем текст сценариев в начало системного промпта
+        if (typeof data.prompt === 'string') {
+            data.prompt = `[Scenarios Active:]\n${activeText}\n\n${data.prompt}`;
+        } else if (Array.isArray(data.prompt)) {
+            data.prompt.unshift({ role: 'system', content: `[Scenarios Active:]\n${activeText}` });
+        }
     }
 });
 
-// Запуск при загрузке и переключении персонажа
-eventSource.on(event_types.CHARACTER_SWITCHED, injectScenarioButton);
-$(document).ready(injectScenarioButton);
-        name: 'Новый сценарий',
-        content: '',
-        enabled: true
-    });
-    saveScenarios();
-    refreshScenariosList();
-}
-
-// При смене персонажа обновляем список сценариев
-function onCharacterSwitched() {
-    const currentCharId = getCurrentCharacterId();
-    if (!scenariosStore[currentCharId]) {
-        scenariosStore[currentCharId] = [];
-        saveScenarios();
-    }
-    refreshScenariosList();
-}
-
-// Вставка активных сценариев в промт (событие CHARACTER_MESSAGE_RENDERED – подходит для модификации промта)
-function onMessageRendered(event) {
-    // Здесь мы можем модифицировать промт, но в SillyTavern для вставки контекста лучше использовать
-    // событие CHAT_COMPLETION_PROMPT_READY. Однако CHARACTER_MESSAGE_RENDERED срабатывает после получения ответа.
-    // Для вставки перед отправкой запроса используем событие CHAT_COMPLETION_PROMPT_READY.
-    // Но в данном расширении мы добавим обработчик на CHAT_COMPLETION_PROMPT_READY.
-}
-
-// Правильный способ: подписаться на событие формирования промта
-function injectScenariosIntoPrompt() {
-    eventSource.on(event_types.CHAT_COMPLETION_PROMPT_READY, (data) => {
-        const currentCharId = getCurrentCharacterId();
-        const scenarios = (scenariosStore[currentCharId] || []).filter(s => s.enabled && s.content.trim() !== '');
-        if (scenarios.length === 0) return;
-
-        // Формируем текст сценариев в виде отдельного блока
-        let scenariosText = '';
-        for (const scenario of scenarios) {
-            scenariosText += `[Сценарий: ${scenario.name}]\n${scenario.content}\n\n`;
-        }
-
-        // Вставляем сценарии в начало промта (или можно в любое место)
-        // data.prompt – это строка промта, которую можно модифицировать
-        // Но будьте осторожны: промт может быть объектом, в зависимости от API.
-        // Для универсальности используем простую строковую вставку.
-        if (typeof data.prompt === 'string') {
-            data.prompt = scenariosText + data.prompt;
+// Запуск функций при загрузке страницы и смене персонажа
+$(document).ready(() => {
+    injectPuzzleButton();
+    // Следим за изменениями в UI, если Таверна перерисовывает редактор
+    const observer = new MutationObserver(injectPuzzleButton);
+    observer.observe(document.body, { childList: true, subtree: true });
+});
         } else if (typeof data.prompt === 'object' && data.prompt.messages) {
             // Для некоторых API промт представлен массивом сообщений
             data.prompt.messages.unshift({ role: 'system', content: scenariosText });
