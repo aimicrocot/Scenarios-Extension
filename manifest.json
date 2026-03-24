@@ -1,0 +1,8 @@
+{
+    "name": "multi-scenarios",
+    "display_name": "Scenario Manager",
+    "version": "1.0.0",
+    "description": "Позволяет создавать и переключать несколько сценариев для одного персонажа.",
+    "author": "Твое Имя",
+    "js_file": "index.js"
+}

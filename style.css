@@ -1,0 +1,13 @@
+.scenario-item {
+    display: flex;
+    align-items: center;
+    background: var(--black75);
+    margin-bottom: 5px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.scenario-toggle {
+    margin-left: auto;
+    /* Стили для твоего тумблера */
+}
