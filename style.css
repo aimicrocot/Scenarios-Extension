@@ -1,130 +1,41 @@
-/* Вкладка Сценарии */
-#multiple-scenarios-tab {
-    padding: 10px;
-}
-
-.drawer-header {
+/* Контейнер для списка сценариев в окне */
+.ms-manager-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #ccc;
-}
-
-.ms-scenarios-container {
-    max-height: calc(100vh - 150px);
-    overflow-y: auto;
-    padding-right: 5px;
-}
-
-.ms-scenario-item {
-    background: #2a2a2a;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    padding: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-.ms-scenario-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.ms-scenario-name {
-    flex: 1;
-    background: #3a3a3a;
-    border: 1px solid #555;
-    color: #e0e0e0;
-    padding: 6px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.ms-scenario-controls {
-    display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 10px;
+    padding: 10px;
 }
 
-/* Toggle switch (тумблер) */
-.ms-toggle {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 22px;
+.ms-item {
+    background: var(--black75);
+    border: 1px solid var(--grey60);
+    border-radius: 8px;
+    padding: 10px;
 }
 
-.ms-toggle-input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+.ms-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
 }
 
-.ms-toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #555;
-    transition: 0.3s;
-    border-radius: 34px;
-}
-
-.ms-toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    transition: 0.3s;
-    border-radius: 50%;
-}
-
-.ms-toggle-input:checked + .ms-toggle-slider {
-    background-color: #4caf50;
-}
-
-.ms-toggle-input:checked + .ms-toggle-slider:before {
-    transform: translateX(22px);
-}
-
-.ms-delete-btn {
-    color: #ff6b6b;
-    cursor: pointer;
-    font-size: 1.1em;
-    transition: 0.2s;
-}
-
-.ms-delete-btn:hover {
-    color: #ff3b3b;
-    transform: scale(1.05);
-}
-
-.ms-scenario-content {
-    width: 100%;
-    background: #1e1e1e;
-    border: 1px solid #444;
-    color: #ddd;
+/* Стилизация под лорбук (Image 3) */
+.ms-input-name {
+    background: var(--black50);
+    color: var(--white);
+    border: 1px solid var(--grey40);
     border-radius: 4px;
-    padding: 8px;
-    font-family: monospace;
-    resize: vertical;
-    min-height: 100px;
-    font-size: 0.9em;
+    padding: 4px 8px;
+    width: 60%;
 }
 
-.ms-empty {
-    text-align: center;
-    color: #aaa;
-    padding: 20px;
-    font-style: italic;
+.ms-textarea {
+    width: 100%;
+    min-height: 80px;
+    background: var(--black25);
+    color: var(--white);
+    border: 1px solid var(--grey40);
+    border-radius: 4px;
+    resize: vertical;
 }
