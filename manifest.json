@@ -1,8 +1,8 @@
 {
-    "name": "multiple-scenarios",
+    "name": "multi-scenarios",
     "display_name": "Scenario Manager",
     "version": "1.0.0",
-    "description": "Управление множественными сценариями для персонажа.",
+    "description": "Добавляет менеджер нескольких сценариев для персонажа.",
     "author": "User",
     "js_file": "index.js"
 }
