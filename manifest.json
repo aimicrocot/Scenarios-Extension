@@ -1,10 +1,10 @@
 {
-  "display_name": "Scenario Manager",
-  "loading_order": 100,
-  "requires": [],
-  "optional": [],
-  "js": "index.js",
-  "css": "style.css",
-  "author": "Your Name",
-  "version": "1.0.0"
+    "display_name": "Multiple Scenarios",
+    "description": "Добавляет возможность создавать несколько сценариев для персонажа с переключателями и подстановкой в промт.",
+    "author": "YourName",
+    "version": "1.0.0",
+    "license": "MIT",
+    "type": "extension",
+    "main": "script.js",
+    "style": "style.css"
 }
