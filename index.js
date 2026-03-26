@@ -1,44 +1,47 @@
-import { extension_settings, getContext } from "../../../extensions.js";
+import { extension_settings } from "../../../extensions.js";
 
 const extensionName = "scenario-setup";
 
 function injectPuzzleButton() {
-    // 1. Проверяем, нет ли уже кнопки
+    // Если Пазл уже на месте — ничего не делаем
     if ($("#scenario-setup-button").length > 0) return;
 
-    // 2. Ищем контейнер. В мобильной версии и новом UI это часто .character_details_controls 
-    // или прямые дочерние элементы #character_details_buttons
-    const buttonBar = $(".character_details_controls, #character_details_buttons").first();
+    // Ищем ту самую кнопку Книги по её уникальному ID, который ты скинул
+    const targetButton = $("#advanced_div");
     
-    if (buttonBar.length > 0) {
-        console.log(`[${extensionName}] Контейнер найден! Добавляю Пазл...`);
+    // Если кнопка Книги есть на экране
+    if (targetButton.length > 0) {
+        const buttonContainer = targetButton.parent(); // Берем контейнер, где лежат все эти кнопки
         
-        // Создаем кнопку в стиле SillyTavern
+        console.log(`[${extensionName}] Нашел контейнер через #advanced_div! Вставляю Пазл.`);
+        
+        // Создаем Пазл, копируя родные классы (interactable) и атрибуты (role="button", tabindex="0")
         const puzzleButton = $(`
             <div id="scenario-setup-button" 
-                 class="menu_button fa-solid fa-puzzle-piece" 
-                 title="Scenario Setup" 
-                 style="cursor: pointer; margin: 0 2px;">
+                 class="menu_button fa-solid fa-puzzle-piece interactable" 
+                 title="Setup scenario" 
+                 tabindex="0" 
+                 role="button"
+                 style="display: flex; align-items: center; justify-content: center;">
             </div>
         `);
 
-        // Вставляем в начало списка кнопок (перед звездочкой)
-        buttonBar.prepend(puzzleButton);
+        // Вставляем Пазл в самое начало контейнера (перед Звездочкой)
+        buttonContainer.prepend(puzzleButton);
         
-        // Клик для теста
+        // Вешаем тестовый клик
         puzzleButton.on("click", (e) => {
-            e.stopPropagation(); // Чтобы не закрылось окно персонажа
-            toastr.info("Сработало! Теперь я вижу кнопку.", "Scenario Setup");
+            e.stopPropagation(); // Запрещаем клику "проваливаться" дальше
+            toastr.success("Ура! Кнопка работает.", "Scenario Setup");
         });
     }
 }
 
 jQuery(async () => {
-    console.log(`[${extensionName}] Запуск поиска кнопок...`);
-    
-    // Следим за DOM, так как SillyTavern рисует это окно при нажатии на аватар
+    // Обсервер следит за появлением #advanced_div при клике на персонажа
     const observer = new MutationObserver(() => injectPuzzleButton());
     observer.observe(document.body, { childList: true, subtree: true });
     
+    // Пробуем запустить сразу
     injectPuzzleButton();
 });
