@@ -46,6 +46,49 @@ function deleteScenario(scenarioId) {
     }
 }
 
+function editScenario(scenarioId) {
+    const scenarios = extension_settings[extensionName].scenarios || [];
+    const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
+    if (!scenario) {
+        toastr.warning("Сценарий не найден");
+        return;
+    }
+
+    const editHtml = `
+        <div id="edit-scenario-popup" style="min-width: 400px;">
+            <h3>Редактирование сценария</h3>
+            <textarea id="edit-scenario-text" rows="8" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-top: 10px;">${escapeHtml(scenario.text)}</textarea>
+            <div style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button id="edit-cancel-btn" class="menu_button">Отмена</button>
+                <button id="edit-save-btn" class="menu_button">Сохранить</button>
+            </div>
+        </div>
+    `;
+
+    callPopup(editHtml, "text");
+    
+    // Обработчики кнопок
+    $("#edit-save-btn").off("click").on("click", () => {
+        const newText = $("#edit-scenario-text").val().trim();
+        if (!newText) {
+            toastr.warning("Текст не может быть пустым");
+            return;
+        }
+        scenario.text = newText;
+        // Обновляем время изменения (опционально)
+        scenario.updated = Date.now();
+        saveSettingsDebounced();
+        renderScenarioList();
+        toastr.success("Сценарий обновлён");
+        // Закрываем попап
+        $(".popup").remove();
+    });
+    
+    $("#edit-cancel-btn").off("click").on("click", () => {
+        $(".popup").remove();
+    });
+}
+
 function renderScenarioList() {
     const $listContainer = $("#scenario-list");
     const scenarios = extension_settings[extensionName].scenarios || [];
@@ -65,16 +108,26 @@ function renderScenarioList() {
                     <strong>${date}</strong><br>
                     ${safeText}
                 </div>
-                <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; margin-left: 8px; opacity: 0.7; flex-shrink: 0;"></i>
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                </div>
             </li>
         `;
     });
     html += '</ul>';
     $listContainer.html(html);
     
+    // Обработчики для удаления
     $(".delete-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         deleteScenario(id);
+    });
+    
+    // Обработчики для редактирования
+    $(".edit-scenario").off("click").on("click", function() {
+        const id = $(this).data("id");
+        editScenario(id);
     });
 }
 
@@ -163,8 +216,6 @@ function injectPuzzleButton() {
             showScenarioMenu();
         });
         console.log("Scenario Setup: Кнопка добавлена");
-    } else {
-        console.log("Scenario Setup: advanced_div ещё не найден, ждём...");
     }
 }
 
@@ -179,7 +230,6 @@ jQuery(async () => {
         }
     }, 500);
     
-    // Также используем MutationObserver для подстраховки
     const observer = new MutationObserver(() => {
         if ($("#advanced_div").length > 0 && $("#scenario-setup-button").length === 0) {
             injectPuzzleButton();
@@ -187,8 +237,6 @@ jQuery(async () => {
     });
     observer.observe(document.body, { childList: true, subtree: true });
     
-    // Первоначальная попытка
     injectPuzzleButton();
-    
     loadSettings();
 });
