@@ -7,11 +7,16 @@
     background-color: var(--black75);
 }
 
-.delete-scenario {
+.delete-scenario,
+.edit-scenario {
     color: var(--white75);
     transition: opacity 0.2s, color 0.2s;
 }
 .delete-scenario:hover {
     color: #ff4444;
+    opacity: 1;
+}
+.edit-scenario:hover {
+    color: #44ff44;
     opacity: 1;
 }
