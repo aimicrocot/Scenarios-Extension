@@ -170,6 +170,38 @@ jQuery(async () => {
     observer.observe(document.body, { childList: true, subtree: true });
     injectPuzzleButton();
     loadSettings();
+});    $("#new_scenario_text").off("input").on("input", updateTokenCounter);
+    updateTokenCounter();
+}
+
+function injectPuzzleButton() {
+    if ($("#scenario-setup-button").length > 0) return;
+
+    const targetButton = $("#advanced_div");
+    if (targetButton.length > 0) {
+        const buttonContainer = targetButton.parent();
+        const puzzleButton = $(`
+            <div id="scenario-setup-button" 
+                 class="menu_button fa-solid fa-puzzle-piece interactable" 
+                 title="Scenario Setup" 
+                 tabindex="0" 
+                 role="button"
+                 style="display: flex; align-items: center; justify-content: center;">
+            </div>
+        `);
+        buttonContainer.prepend(puzzleButton);
+        puzzleButton.on("click", (e) => {
+            e.stopPropagation();
+            showScenarioMenu();
+        });
+    }
+}
+
+jQuery(async () => {
+    const observer = new MutationObserver(() => injectPuzzleButton());
+    observer.observe(document.body, { childList: true, subtree: true });
+    injectPuzzleButton();
+    loadSettings();
 });
 ```
 
