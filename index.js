@@ -55,10 +55,10 @@ function editScenario(scenarioId) {
     }
 
     const editHtml = `
-        <div id="edit-scenario-popup" style="min-width: 400px;">
+        <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
             <h3>Редактирование сценария</h3>
-            <textarea id="edit-scenario-text" rows="8" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-top: 10px;">${escapeHtml(scenario.text)}</textarea>
-            <div style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+            <textarea id="edit-scenario-text" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button id="edit-cancel-btn" class="menu_button">Отмена</button>
                 <button id="edit-save-btn" class="menu_button">Сохранить</button>
             </div>
@@ -67,7 +67,8 @@ function editScenario(scenarioId) {
 
     callPopup(editHtml, "text");
     
-    // Обработчики кнопок
+    $("#edit-scenario-text").val(scenario.text);
+    
     $("#edit-save-btn").off("click").on("click", () => {
         const newText = $("#edit-scenario-text").val().trim();
         if (!newText) {
@@ -75,12 +76,10 @@ function editScenario(scenarioId) {
             return;
         }
         scenario.text = newText;
-        // Обновляем время изменения (опционально)
         scenario.updated = Date.now();
         saveSettingsDebounced();
         renderScenarioList();
         toastr.success("Сценарий обновлён");
-        // Закрываем попап
         $(".popup").remove();
     });
     
@@ -118,13 +117,11 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
     
-    // Обработчики для удаления
     $(".delete-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         deleteScenario(id);
     });
     
-    // Обработчики для редактирования
     $(".edit-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         editScenario(id);
@@ -133,7 +130,7 @@ function renderScenarioList() {
 
 function showScenarioMenu() {
     const popupHtml = `
-<div id="scenario-manager-window" style="min-width: 300px;">
+<div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
     <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <i class="fa-solid fa-puzzle-piece"></i> 
         <span>Управление сценариями</span>
@@ -149,7 +146,7 @@ function showScenarioMenu() {
             placeholder="(Обстоятельства и контекст этого диалога)" 
             class="text_pole" 
             rows="5" 
-            style="width: 100%; background: rgba(0,0,0,0.3); color: white;"
+            style="width: 100%; background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;"
         ></textarea>
     </div>
 
@@ -220,7 +217,6 @@ function injectPuzzleButton() {
 }
 
 jQuery(async () => {
-    // Ждём появления advanced_div с интервалом
     const checkInterval = setInterval(() => {
         if ($("#advanced_div").length > 0) {
             injectPuzzleButton();
