@@ -1,31 +1,26 @@
-<div id="scenario-manager-window" style="min-width: 350px; max-width: 500px;">
-    <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+<div id="scenario-manager-window" class="scenario-popup">
+    <h3 class="scenario-header">
         <i class="fa-solid fa-puzzle-piece"></i> 
         <span>Сценарии персонажа</span>
     </h3>
     
-    <!-- Контейнер для списка сценариев -->
-    <div id="scenario-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
-        <!-- Сюда JS будет вставлять сценарии -->
+    <!-- Список существующих сценариев -->
+    <div id="scenario-list" class="scenario-list-scroll">
+        <!-- Сюда JS вставит сценарии -->
     </div>
 
-    <hr style="opacity: 0.2; margin-bottom: 15px;">
-
-    <div class="scenario-edit-area">
-        <label style="font-size: 0.8em; opacity: 0.8;">Новый сценарий:</label>
+    <div class="scenario-new-entry">
         <textarea 
             id="new_scenario_text" 
-            placeholder="(Обстоятельства и контекст этого диалога)" 
+            placeholder="Введите новый сценарий..." 
             class="text_pole" 
-            rows="3" 
-            style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-top: 5px;"
-        ></textarea>
-    </div>
-
-    <div style="margin-top: 15px; display: flex; justify-content: flex-end;">
-        <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px; padding: 5px 15px;">
-            <i class="fa-solid fa-plus"></i>
-            <span>Добавить</span>
-        </button>
+            rows="3"></textarea>
+        
+        <div class="scenario-footer">
+            <span class="token-count">Токенов: 0</span>
+            <button id="add_scenario_btn" class="menu_button">
+                <i class="fa-solid fa-plus"></i> Добавить
+            </button>
+        </div>
     </div>
 </div>
