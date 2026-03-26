@@ -32,60 +32,71 @@ function updateTokenCounter() {
     $(".token-counter").text(estimatedTokens);
 }
 
-// Глобальная функция для установки текста Scenario через API SillyTavern
+// Главная функция установки текста Scenario
 function setScenarioField(text) {
-    // 1. Попробуем использовать window.promptManager (если он существует)
+    // Способ 1: через window.promptManager.setPromptValue
+    if (window.promptManager && typeof window.promptManager.setPromptValue === 'function') {
+        try {
+            window.promptManager.setPromptValue('scenario', text);
+            console.log("[Scenario Setup] Установлено через promptManager.setPromptValue");
+            return;
+        } catch (e) { console.warn(e); }
+    }
+    
+    // Способ 2: через window.promptManager.setPrompt
     if (window.promptManager && typeof window.promptManager.setPrompt === 'function') {
         try {
             window.promptManager.setPrompt('scenario', text);
-            console.log("[Scenario Setup] Set scenario via promptManager.setPrompt");
+            console.log("[Scenario Setup] Установлено через promptManager.setPrompt");
             return;
-        } catch (e) {
-            console.warn("[Scenario Setup] promptManager.setPrompt failed", e);
-        }
+        } catch (e) { console.warn(e); }
     }
     
-    // 2. Попробуем использовать контекст (если доступен)
-    const context = getContext();
-    if (context && context.promptManager && typeof context.promptManager.setPrompt === 'function') {
+    // Способ 3: через window.PromptManager.updatePrompt
+    if (window.PromptManager && typeof window.PromptManager.updatePrompt === 'function') {
         try {
-            context.promptManager.setPrompt('scenario', text);
-            console.log("[Scenario Setup] Set scenario via context.promptManager.setPrompt");
+            window.PromptManager.updatePrompt('scenario', text);
+            console.log("[Scenario Setup] Установлено через PromptManager.updatePrompt");
             return;
-        } catch (e) {
-            console.warn("[Scenario Setup] context.promptManager.setPrompt failed", e);
+        } catch (e) { console.warn(e); }
+    }
+    
+    // Способ 4: работа с localStorage и событием
+    try {
+        const promptsKey = 'prompt_manager_prompts';
+        let prompts = JSON.parse(localStorage.getItem(promptsKey) || '{}');
+        if (!prompts.scenario) prompts.scenario = { text: '' };
+        prompts.scenario.text = text;
+        localStorage.setItem(promptsKey, JSON.stringify(prompts));
+        
+        // Триггерим обновление интерфейса
+        if (window.promptManager && typeof window.promptManager.refresh === 'function') {
+            window.promptManager.refresh();
+        } else if (window.PromptManager && typeof window.PromptManager.refresh === 'function') {
+            window.PromptManager.refresh();
+        } else {
+            // Запасной вариант: отправить кастомное событие
+            window.dispatchEvent(new CustomEvent('promptManagerRefresh'));
         }
+        console.log("[Scenario Setup] Установлено через localStorage + событие");
+    } catch (e) {
+        console.error("[Scenario Setup] Не удалось установить Scenario:", e);
+        toastr.warning("Не удалось автоматически установить сценарий. Попробуйте открыть Prompt Manager и нажать карандаш рядом с Scenario.");
     }
-    
-    // 3. Если API не сработал, попробуем прямой доступ к DOM (только если редактор открыт)
-    const $field = $("#completion_prompt_manager_popup_entry_form_prompt");
-    if ($field.length) {
-        $field.val(text).trigger("input");
-        console.log("[Scenario Setup] Set scenario via DOM fallback");
-        return;
-    }
-    
-    console.warn("[Scenario Setup] Не удалось установить текст Scenario. Возможно, Prompt Manager не инициализирован.");
-    toastr.warning("Не удалось установить сценарий. Убедитесь, что Prompt Manager работает.");
 }
 
-// Возвращает объединённый текст из всех активных сценариев
 function getCombinedScenarioText() {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const activeScenarios = scenarios.filter(s => s.enabled);
     if (activeScenarios.length === 0) return "";
-    
-    // Можно добавить разделитель, например два перевода строки
     return activeScenarios.map(s => s.text).join("\n\n");
 }
 
-// Обновляет поле Scenario на основе текущего набора активных сценариев
 function updateScenarioFromActive() {
     const combined = getCombinedScenarioText();
     setScenarioField(combined);
 }
 
-// Удаление сценария
 function deleteScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
@@ -94,14 +105,13 @@ function deleteScenario(scenarioId) {
         extension_settings[extensionName].scenarios = scenarios;
         saveSettingsDebounced();
         renderScenarioList();
-        updateScenarioFromActive(); // пересчитываем и обновляем поле
+        updateScenarioFromActive();
         toastr.info("Сценарий удалён");
     } else {
         toastr.warning("Не удалось найти сценарий для удаления");
     }
 }
 
-// Включение/отключение сценария
 function toggleScenario(scenarioId, enabled) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const targetIndex = scenarios.findIndex(s => String(s.id) === String(scenarioId));
@@ -110,11 +120,10 @@ function toggleScenario(scenarioId, enabled) {
     scenarios[targetIndex].enabled = enabled;
     extension_settings[extensionName].scenarios = scenarios;
     saveSettingsDebounced();
-    renderScenarioList();         // обновляем чекбоксы
-    updateScenarioFromActive();   // обновляем поле Scenario
+    renderScenarioList();
+    updateScenarioFromActive();
 }
 
-// Рендер списка сценариев (чекбоксы + корзины)
 function renderScenarioList() {
     const $listContainer = $("#scenario-list");
     const scenarios = extension_settings[extensionName].scenarios || [];
@@ -157,7 +166,6 @@ function renderScenarioList() {
     });
 }
 
-// Отображение окна управления
 function showScenarioMenu() {
     const popupHtml = `
 <div id="scenario-manager-window" style="min-width: 350px;">
