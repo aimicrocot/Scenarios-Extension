@@ -1,28 +1,28 @@
-<div id="scenario-manager-window" class="dialog-window" style="min-width: 400px; max-width: 600px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid var(--smart-line-color);">
+<div id="scenario-manager-window" style="min-width: 300px;">
+    <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <i class="fa-solid fa-puzzle-piece"></i> 
+        <span>Управление сценариями</span>
+    </h3>
     
-    <div class="popup-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--smart-line-color); padding-bottom: 10px;">
-        <i class="fa-solid fa-puzzle-piece" style="font-size: 1.3em;"></i> 
-        <h3 style="margin: 0;">Управление сценариями</h3>
-    </div>
-    
-    <div id="scenario-list" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px; border: 1px solid var(--smart-line-color); background: rgba(0,0,0,0.2); border-radius: 4px; padding: 5px;">
-        <p style="opacity: 0.5; font-style: italic; font-size: 0.9em; text-align: center; padding: 20px;">Список сценариев пуст...</p>
+    <!-- Область для списка (тут будут тумблеры) -->
+    <div id="scenario-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid var(--smart-line-color);">
+        <p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>
     </div>
 
+    <!-- Поле ввода как в оригинале -->
     <div class="scenario-edit-area">
-        <label for="new_scenario_text" style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px; display: block;">Добавить новый сценарий:</label>
         <textarea 
             id="new_scenario_text" 
             placeholder="(Обстоятельства и контекст этого диалога)" 
             class="text_pole" 
             rows="5" 
-            style="width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--smart-line-color); border-radius: 4px; padding: 10px;"
+            style="width: 100%; background: rgba(0,0,0,0.3); color: white;"
         ></textarea>
     </div>
 
     <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 0.8em; opacity: 0.6;">Токенов: 0</span>
-        <button id="add_scenario_btn" class="menu_button interactable" style="display: flex; align-items: center; gap: 8px; padding: 8px 15px;">
+        <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
             <span>Добавить сценарий</span>
         </button>
