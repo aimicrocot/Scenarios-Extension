@@ -1,7 +1,7 @@
 import { extension_settings, getContext } from "../../../extensions.js";
 import { callPopup, saveSettingsDebounced } from "../../../../script.js";
 
-const extensionName = "scenario-setup"; // Убедитесь, что имя совпадает с папкой расширения
+const extensionName = "scenario-setup";
 
 const defaultSettings = {
     scenarios: []
@@ -139,6 +139,59 @@ function showScenarioMenu() {
     });
     
     $("#new_scenario_text").off("input").on("input", updateTokenCounter);
+    updateTokenCounter();
+}
+
+function injectPuzzleButton() {
+    if ($("#scenario-setup-button").length > 0) return;
+
+    const targetButton = $("#advanced_div");
+    if (targetButton.length > 0) {
+        const buttonContainer = targetButton.parent();
+        const puzzleButton = $(`
+            <div id="scenario-setup-button" 
+                 class="menu_button fa-solid fa-puzzle-piece interactable" 
+                 title="Scenario Setup" 
+                 tabindex="0" 
+                 role="button"
+                 style="display: flex; align-items: center; justify-content: center;">
+            </div>
+        `);
+        buttonContainer.prepend(puzzleButton);
+        puzzleButton.on("click", (e) => {
+            e.stopPropagation();
+            showScenarioMenu();
+        });
+        console.log("Scenario Setup: Кнопка добавлена");
+    } else {
+        console.log("Scenario Setup: advanced_div ещё не найден, ждём...");
+    }
+}
+
+jQuery(async () => {
+    // Ждём появления advanced_div с интервалом
+    const checkInterval = setInterval(() => {
+        if ($("#advanced_div").length > 0) {
+            injectPuzzleButton();
+            if ($("#scenario-setup-button").length > 0) {
+                clearInterval(checkInterval);
+            }
+        }
+    }, 500);
+    
+    // Также используем MutationObserver для подстраховки
+    const observer = new MutationObserver(() => {
+        if ($("#advanced_div").length > 0 && $("#scenario-setup-button").length === 0) {
+            injectPuzzleButton();
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    
+    // Первоначальная попытка
+    injectPuzzleButton();
+    
+    loadSettings();
+});    $("#new_scenario_text").off("input").on("input", updateTokenCounter);
     updateTokenCounter();
 }
 
