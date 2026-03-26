@@ -1,41 +1,58 @@
 import { extension_settings, getContext } from "../../../extensions.js";
-import { callPopup, saveSettingsDebounced } from "../../../../script.js"; // Добавлен импорт сохранения
+import { callPopup, saveSettingsDebounced } from "../../../../script.js";
 
+const extensionName = "scenario-setup"; // должно совпадать с именем папки
 const scriptPath = import.meta.url;
 const extensionFolderPath = scriptPath.substring(0, scriptPath.lastIndexOf('/'));
-const extensionName = "scenario-setup";
 
-// 1. Подготавливаем структуру для сохранения настроек
-if (!extension_settings[extensionName]) {
-    extension_settings[extensionName] = { characters: {} };
+const defaultSettings = {
+    scenarios: [] // массив объектов { id: string, text: string, created: number }
+};
+
+function loadSettings() {
+    if (!extension_settings[extensionName]) {
+        extension_settings[extensionName] = {};
+    }
+    // Если в настройках нет scenarios, инициализируем пустым массивом
+    if (!extension_settings[extensionName].scenarios) {
+        extension_settings[extensionName].scenarios = [...defaultSettings.scenarios];
+        saveSettingsDebounced();
+    }
 }
 
-// 2. Функция для отрисовки списка сценариев
-function renderScenarios() {
-    const charId = getContext().character_id;
-    if (!charId) return;
-
-    const scenarios = extension_settings[extensionName].characters[charId] || [];
-    const listContainer = $("#scenario-list");
+function renderScenarioList() {
+    const $listContainer = $("#scenario-list");
+    const scenarios = extension_settings[extensionName].scenarios || [];
     
-    listContainer.empty(); // Очищаем текущий список
-
     if (scenarios.length === 0) {
-        listContainer.append('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>');
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>');
         return;
     }
+    
+    // Простой вывод: каждый сценарий как элемент списка с текстом и датой
+    let html = '<ul style="margin: 0; padding-left: 1.2em;">';
+    scenarios.forEach(scenario => {
+        const date = new Date(scenario.created).toLocaleString();
+        // Экранируем текст, чтобы избежать XSS
+        const safeText = escapeHtml(scenario.text);
+        html += `<li style="margin-bottom: 8px;">
+                    <strong>${date}</strong><br>
+                    ${safeText}
+                 </li>`;
+    });
+    html += '</ul>';
+    $listContainer.html(html);
+}
 
-    // Выводим каждый сохраненный сценарий
-    scenarios.forEach((text, index) => {
-        listContainer.append(`
-            <div style="margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--smart-line-color);">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <input type="checkbox" checked>
-                    <b>Сценарий ${index + 1}</b>
-                </div>
-                <div style="font-size: 0.9em; opacity: 0.9;">${text}</div>
-            </div>
-        `);
+// Простая функция экранирования HTML
+function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+        return c;
     });
 }
 
@@ -46,40 +63,57 @@ async function showScenarioMenu() {
         const popupHtml = await response.text();
         
         callPopup(popupHtml, "text");
-        
-        // Отрисовываем сценарии при открытии окна
-        renderScenarios();
+        console.log("Scenario Setup: Окно открыто");
 
-        // 3. Оживляем кнопку "Добавить"
+        // Загружаем актуальные настройки перед отрисовкой
+        loadSettings();
+        renderScenarioList();
+        
+        // Обработчик кнопки добавления
         $("#add_scenario_btn").off("click").on("click", () => {
-            const text = $("#new_scenario_text").val().trim();
-            const charId = getContext().character_id;
-            
+            const $textarea = $("#new_scenario_text");
+            const text = $textarea.val().trim();
             if (!text) {
-                toastr.warning("Введите текст сценария!");
+                toastr.warning("Введите текст сценария");
                 return;
             }
-
-            // Создаем массив для персонажа, если его еще нет
-            if (!extension_settings[extensionName].characters[charId]) {
-                extension_settings[extensionName].characters[charId] = [];
-            }
-
-            // Сохраняем текст
-            extension_settings[extensionName].characters[charId].push(text);
+            
+            const newScenario = {
+                id: Date.now().toString(),
+                text: text,
+                created: Date.now()
+            };
+            
+            extension_settings[extensionName].scenarios.push(newScenario);
             saveSettingsDebounced();
             
-            // Очищаем поле и обновляем список
-            $("#new_scenario_text").val("");
-            renderScenarios();
+            // Обновляем список
+            renderScenarioList();
             
-            toastr.success("Сценарий добавлен!");
+            // Очищаем поле
+            $textarea.val("");
+            
+            // Обновляем счётчик токенов (опционально)
+            updateTokenCounter();
+            
+            toastr.success("Сценарий добавлен");
         });
-
+        
+        // Привязываем обновление счётчика токенов (можно реализовать позже)
+        $("#new_scenario_text").on("input", updateTokenCounter);
+        updateTokenCounter();
+        
     } catch (error) {
-        console.error("Scenario Setup:", error);
-        toastr.error(`Не удалось загрузить файл окна.`);
+        console.error("Scenario Setup: Ошибка загрузки окна:", error);
+        toastr.error(`Не удалось загрузить файл окна. Проверьте консоль F12.`);
     }
+}
+
+function updateTokenCounter() {
+    const text = $("#new_scenario_text").val() || "";
+    // Простая оценка: количество слов * 1.3 (можно заменить на реальный токенизатор)
+    const estimatedTokens = Math.ceil(text.length / 4);
+    $(".token-counter").text(estimatedTokens);
 }
 
 function injectPuzzleButton() {
@@ -109,4 +143,7 @@ jQuery(async () => {
     const observer = new MutationObserver(() => injectPuzzleButton());
     observer.observe(document.body, { childList: true, subtree: true });
     injectPuzzleButton();
+    
+    // Инициализируем настройки при старте
+    loadSettings();
 });
