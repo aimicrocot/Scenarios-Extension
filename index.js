@@ -118,13 +118,3 @@ jQuery(async () => {
     observer.observe(document.body, { childList: true, subtree: true });
     injectPuzzleButton();
 });
-        targetButton.parent().prepend(puzzleButton);
-        puzzleButton.on("click", (e) => { e.stopPropagation(); showScenarioMenu(); });
-    }
-}
-
-jQuery(async () => {
-    const observer = new MutationObserver(() => injectPuzzleButton());
-    observer.observe(document.body, { childList: true, subtree: true });
-    injectPuzzleButton();
-});
