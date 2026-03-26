@@ -1,16 +1,10 @@
 import { extension_settings, getContext } from "../../../extensions.js";
 import { callPopup, saveSettingsDebounced } from "../../../../script.js";
 
-// Умное определение пути к папке расширения
-const scriptPath = import.meta.url;
-const extensionFolderPath = scriptPath.substring(0, scriptPath.lastIndexOf('/'));
+const extensionName = "scenario-setup"; // Убедитесь, что имя совпадает с папкой расширения
 
-// Имя расширения должно совпадать с именем папки
-const extensionName = "scenario-setup"; // ⚠️ ПРОВЕРЬТЕ: если папка называется иначе, замените здесь
-
-// Настройки по умолчанию
 const defaultSettings = {
-    scenarios: [] // массив объектов { id: string, text: string, created: number }
+    scenarios: []
 };
 
 function loadSettings() {
@@ -29,8 +23,6 @@ function escapeHtml(str) {
         if (m === '<') return '&lt;';
         if (m === '>') return '&gt;';
         return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-        return c;
     });
 }
 
@@ -42,13 +34,12 @@ function updateTokenCounter() {
 
 function deleteScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
-    // Поиск по строковому ID
     const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
     if (index !== -1) {
         scenarios.splice(index, 1);
         extension_settings[extensionName].scenarios = scenarios;
         saveSettingsDebounced();
-        renderScenarioList(); // обновляем список
+        renderScenarioList();
         toastr.info("Сценарий удалён");
     } else {
         toastr.warning("Не удалось найти сценарий для удаления");
@@ -81,54 +72,74 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
     
-    // Привязываем обработчики к кнопкам удаления
     $(".delete-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         deleteScenario(id);
     });
 }
 
-async function showScenarioMenu() {
-    try {
-        const response = await fetch(`${extensionFolderPath}/scenario_window.html`);
-        if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
-        const popupHtml = await response.text();
-        
-        callPopup(popupHtml, "text");
-        console.log("Scenario Setup: Окно открыто");
+function showScenarioMenu() {
+    const popupHtml = `
+<div id="scenario-manager-window" style="min-width: 300px;">
+    <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <i class="fa-solid fa-puzzle-piece"></i> 
+        <span>Управление сценариями</span>
+    </h3>
+    
+    <div id="scenario-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid var(--smart-line-color);">
+        <p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>
+    </div>
 
-        loadSettings();
+    <div class="scenario-edit-area">
+        <textarea 
+            id="new_scenario_text" 
+            placeholder="(Обстоятельства и контекст этого диалога)" 
+            class="text_pole" 
+            rows="5" 
+            style="width: 100%; background: rgba(0,0,0,0.3); color: white;"
+        ></textarea>
+    </div>
+
+    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0</span>
+        <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
+            <i class="fa-solid fa-plus"></i>
+            <span>Добавить сценарий</span>
+        </button>
+    </div>
+</div>
+    `;
+    
+    callPopup(popupHtml, "text");
+    console.log("Scenario Setup: Окно открыто");
+
+    loadSettings();
+    renderScenarioList();
+    
+    $("#add_scenario_btn").off("click").on("click", () => {
+        const $textarea = $("#new_scenario_text");
+        const text = $textarea.val().trim();
+        if (!text) {
+            toastr.warning("Введите текст сценария");
+            return;
+        }
+        
+        const newScenario = {
+            id: String(Date.now()),
+            text: text,
+            created: Date.now()
+        };
+        
+        extension_settings[extensionName].scenarios.push(newScenario);
+        saveSettingsDebounced();
         renderScenarioList();
-        
-        $("#add_scenario_btn").off("click").on("click", () => {
-            const $textarea = $("#new_scenario_text");
-            const text = $textarea.val().trim();
-            if (!text) {
-                toastr.warning("Введите текст сценария");
-                return;
-            }
-            
-            const newScenario = {
-                id: String(Date.now()), // сохраняем как строку
-                text: text,
-                created: Date.now()
-            };
-            
-            extension_settings[extensionName].scenarios.push(newScenario);
-            saveSettingsDebounced();
-            renderScenarioList();
-            $textarea.val("");
-            updateTokenCounter();
-            toastr.success("Сценарий добавлен");
-        });
-        
-        $("#new_scenario_text").off("input").on("input", updateTokenCounter);
+        $textarea.val("");
         updateTokenCounter();
-        
-    } catch (error) {
-        console.error("Scenario Setup: Ошибка загрузки окна:", error);
-        toastr.error(`Не удалось загрузить файл окна. Проверьте консоль F12.`);
-    }
+        toastr.success("Сценарий добавлен");
+    });
+    
+    $("#new_scenario_text").off("input").on("input", updateTokenCounter);
+    updateTokenCounter();
 }
 
 function injectPuzzleButton() {
