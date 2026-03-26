@@ -1,32 +1,28 @@
 import { extension_settings, getContext } from "../../../extensions.js";
 import { callPopup } from "../../../../script.js";
 
-const extensionName = "scenario-setup";
-// Путь к папке расширения относительно корня SillyTavern
-const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
+// Умное определение пути к папке расширения
+const scriptPath = import.meta.url;
+const extensionFolderPath = scriptPath.substring(0, scriptPath.lastIndexOf('/'));
 
 async function showScenarioMenu() {
     try {
-        // Загружаем HTML-шаблон окна
-        const popupHtml = await $.get(`${extensionFolderPath}/scenario_window.html`);
+        // Загружаем HTML, используя динамический путь
+        const response = await fetch(`${extensionFolderPath}/scenario_window.html`);
+        if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
+        const popupHtml = await response.text();
         
-        // Вызываем модальное окно
         callPopup(popupHtml, "text");
-        
-        console.log(`[${extensionName}] Окно сценариев открыто`);
-        
-        // В будущем здесь будет логика загрузки существующих сценариев
+        console.log("Scenario Setup: Окно открыто");
+
+        // Тестовая кнопка
         $("#add_scenario_btn").on("click", () => {
-            const text = $("#new_scenario_text").val();
-            if (text) {
-                toastr.success("Сценарий добавлен (пока без сохранения)", "Scenario Setup");
-                $("#new_scenario_text").val("");
-            }
+            toastr.info("Кнопка нажата! Скоро добавим сохранение.");
         });
 
     } catch (error) {
-        console.error(`[${extensionName}] Ошибка загрузки окна:`, error);
-        toastr.error("Не удалось загрузить файл scenario_window.html");
+        console.error("Scenario Setup: Ошибка загрузки окна:", error);
+        toastr.error(`Не удалось загрузить файл окна. Проверьте консоль F12.`);
     }
 }
 
@@ -36,19 +32,16 @@ function injectPuzzleButton() {
     const targetButton = $("#advanced_div");
     if (targetButton.length > 0) {
         const buttonContainer = targetButton.parent();
-        
         const puzzleButton = $(`
             <div id="scenario-setup-button" 
                  class="menu_button fa-solid fa-puzzle-piece interactable" 
-                 title="Setup scenario" 
+                 title="Scenario Setup" 
                  tabindex="0" 
                  role="button"
                  style="display: flex; align-items: center; justify-content: center;">
             </div>
         `);
-
         buttonContainer.prepend(puzzleButton);
-        
         puzzleButton.on("click", (e) => {
             e.stopPropagation();
             showScenarioMenu();
