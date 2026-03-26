@@ -42,13 +42,16 @@ function updateTokenCounter() {
 
 function deleteScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
-    const index = scenarios.findIndex(s => s.id === scenarioId);
+    // Поиск по строковому ID
+    const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
     if (index !== -1) {
         scenarios.splice(index, 1);
         extension_settings[extensionName].scenarios = scenarios;
         saveSettingsDebounced();
-        renderScenarioList();
+        renderScenarioList(); // обновляем список
         toastr.info("Сценарий удалён");
+    } else {
+        toastr.warning("Не удалось найти сценарий для удаления");
     }
 }
 
@@ -106,7 +109,7 @@ async function showScenarioMenu() {
             }
             
             const newScenario = {
-                id: Date.now().toString(),
+                id: String(Date.now()), // сохраняем как строку
                 text: text,
                 created: Date.now()
             };
