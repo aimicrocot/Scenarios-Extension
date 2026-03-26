@@ -1,8 +1,59 @@
-#scenario-setup-button {
-    cursor: pointer;
-    color: var(--white75);
+/* Кнопка в меню */
+#scenario-setup-button { cursor: pointer; color: var(--white75); }
+#scenario-setup-button:hover { color: var(--white); }
+
+/* Окно */
+.scenario-popup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 320px;
 }
-#scenario-setup-button:hover {
-    color: var(--white);
-    background-color: var(--black75);
+
+.scenario-header { margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+/* Список */
+.scenario-list-scroll {
+    max-height: 250px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 5px;
+}
+
+/* Карточка сценария */
+.scenario-item {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--smart-line-color);
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.scenario-item-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+    font-size: 0.85em;
+}
+
+.delete-scenario {
+    margin-left: auto;
+    color: #ff5f5f;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* Футер и кнопка Добавить */
+.scenario-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.scenario-new-entry textarea {
+    width: 100% !important;
+    box-sizing: border-box;
 }
