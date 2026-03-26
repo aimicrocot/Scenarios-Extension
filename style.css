@@ -1,15 +1,17 @@
 #scenario-setup-button {
-
     cursor: pointer;
-
     color: var(--white75);
-
+}
+#scenario-setup-button:hover {
+    color: var(--white);
+    background-color: var(--black75);
 }
 
-#scenario-setup-button:hover {
-
-    color: var(--white);
-
-    background-color: var(--black75);
-
+.delete-scenario {
+    color: var(--white75);
+    transition: opacity 0.2s, color 0.2s;
+}
+.delete-scenario:hover {
+    color: #ff4444;
+    opacity: 1;
 }
