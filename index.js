@@ -1,40 +1,44 @@
 import { extension_settings, getContext } from "../../../extensions.js";
 
 const extensionName = "scenario-setup";
-const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 
 function injectPuzzleButton() {
-    // 1. Ищем панель кнопок в редакторе персонажа
-    const buttonBar = $("#character_details_buttons");
+    // 1. Проверяем, нет ли уже кнопки
+    if ($("#scenario-setup-button").length > 0) return;
+
+    // 2. Ищем контейнер. В мобильной версии и новом UI это часто .character_details_controls 
+    // или прямые дочерние элементы #character_details_buttons
+    const buttonBar = $(".character_details_controls, #character_details_buttons").first();
     
-    // Если панель нашли и кнопки еще нет — добавляем
-    if (buttonBar.length > 0 && $("#scenario-setup-button").length === 0) {
-        console.log(`[${extensionName}] Нашел панель, вставляю Пазл...`);
+    if (buttonBar.length > 0) {
+        console.log(`[${extensionName}] Контейнер найден! Добавляю Пазл...`);
         
+        // Создаем кнопку в стиле SillyTavern
         const puzzleButton = $(`
-            <div id="scenario-setup-button" class="menu_button fa-solid fa-puzzle-piece" 
+            <div id="scenario-setup-button" 
+                 class="menu_button fa-solid fa-puzzle-piece" 
                  title="Scenario Setup" 
-                 style="display: flex; align-items: center; justify-content: center;">
+                 style="cursor: pointer; margin: 0 2px;">
             </div>
         `);
 
-        // Вставляем перед кнопкой чата
+        // Вставляем в начало списка кнопок (перед звездочкой)
         buttonBar.prepend(puzzleButton);
         
-        puzzleButton.on("click", () => {
-            toastr.info("Окно сценариев скоро будет здесь!", "Scenario Setup");
+        // Клик для теста
+        puzzleButton.on("click", (e) => {
+            e.stopPropagation(); // Чтобы не закрылось окно персонажа
+            toastr.info("Сработало! Теперь я вижу кнопку.", "Scenario Setup");
         });
     }
 }
 
-// Запуск при загрузке
 jQuery(async () => {
-    console.log(`[${extensionName}] Расширение проснулось...`);
+    console.log(`[${extensionName}] Запуск поиска кнопок...`);
     
-    // Следим за изменениями DOM, так как SillyTavern постоянно перерисовывает окна
+    // Следим за DOM, так как SillyTavern рисует это окно при нажатии на аватар
     const observer = new MutationObserver(() => injectPuzzleButton());
     observer.observe(document.body, { childList: true, subtree: true });
     
-    // Пробуем вставить сразу на всякий случай
     injectPuzzleButton();
 });
