@@ -1,115 +1,107 @@
 import { extension_settings, getContext } from "../../../extensions.js";
-import { callPopup, saveSettingsDebounced } from "../../../../script.js";
+import { callPopup, saveSettingsDebounced } from "../../../../script.js"; // Добавлен импорт сохранения
 
-const extensionName = "scenario-setup";
 const scriptPath = import.meta.url;
 const extensionFolderPath = scriptPath.substring(0, scriptPath.lastIndexOf('/'));
+const extensionName = "scenario-setup";
 
-// Инициализация настроек
+// 1. Подготавливаем структуру для сохранения настроек
 if (!extension_settings[extensionName]) {
     extension_settings[extensionName] = { characters: {} };
 }
 
-// Получаем ID текущего персонажа
-function getCharId() {
-    return getContext().character_id;
-}
-
-// Рендер списка сценариев в окне
+// 2. Функция для отрисовки списка сценариев
 function renderScenarios() {
-    const charId = getCharId();
+    const charId = getContext().character_id;
     if (!charId) return;
 
     const scenarios = extension_settings[extensionName].characters[charId] || [];
     const listContainer = $("#scenario-list");
-    listContainer.empty();
+    
+    listContainer.empty(); // Очищаем текущий список
 
     if (scenarios.length === 0) {
-        listContainer.append('<p style="opacity: 0.5; font-style: italic; text-align: center;">Список сценариев пуст...</p>');
+        listContainer.append('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>');
         return;
     }
 
-    scenarios.forEach((s, i) => {
-        const item = $(`
-            <div class="scenario-item">
-                <div class="scenario-item-header">
-                    <input type="checkbox" class="scenario-toggle" data-id="${i}" ${s.enabled ? 'checked' : ''}>
-                    <span>Сценарий #${i + 1}</span>
-                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${i}"></i>
+    // Выводим каждый сохраненный сценарий
+    scenarios.forEach((text, index) => {
+        listContainer.append(`
+            <div style="margin-bottom: 10px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--smart-line-color);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <input type="checkbox" checked>
+                    <b>Сценарий ${index + 1}</b>
                 </div>
-                <textarea class="text_pole edit-scenario" data-id="${i}">${s.text}</textarea>
+                <div style="font-size: 0.9em; opacity: 0.9;">${text}</div>
             </div>
         `);
-        listContainer.append(item);
     });
 }
 
 async function showScenarioMenu() {
     try {
         const response = await fetch(`${extensionFolderPath}/scenario_window.html`);
+        if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
         const popupHtml = await response.text();
+        
         callPopup(popupHtml, "text");
-
+        
+        // Отрисовываем сценарии при открытии окна
         renderScenarios();
 
-        // Кнопка Добавить
+        // 3. Оживляем кнопку "Добавить"
         $("#add_scenario_btn").off("click").on("click", () => {
             const text = $("#new_scenario_text").val().trim();
-            const charId = getCharId();
-            if (!text || !charId) return;
+            const charId = getContext().character_id;
+            
+            if (!text) {
+                toastr.warning("Введите текст сценария!");
+                return;
+            }
 
+            // Создаем массив для персонажа, если его еще нет
             if (!extension_settings[extensionName].characters[charId]) {
                 extension_settings[extensionName].characters[charId] = [];
             }
 
-            extension_settings[extensionName].characters[charId].push({
-                text: text,
-                enabled: true
-            });
-
+            // Сохраняем текст
+            extension_settings[extensionName].characters[charId].push(text);
             saveSettingsDebounced();
+            
+            // Очищаем поле и обновляем список
             $("#new_scenario_text").val("");
             renderScenarios();
-            toastr.success("Сценарий сохранен");
-        });
-
-        // Переключатель (чекбокс)
-        $(document).off("change", ".scenario-toggle").on("change", ".scenario-toggle", function() {
-            const id = $(this).data("id");
-            const charId = getCharId();
-            extension_settings[extensionName].characters[charId][id].enabled = $(this).is(":checked");
-            saveSettingsDebounced();
-        });
-
-        // Удаление
-        $(document).off("click", ".delete-scenario").on("click", ".delete-scenario", function() {
-            const id = $(this).data("id");
-            const charId = getCharId();
-            extension_settings[extensionName].characters[charId].splice(id, 1);
-            saveSettingsDebounced();
-            renderScenarios();
-        });
-
-        // Редактирование существующего
-        $(document).off("input", ".edit-scenario").on("input", ".edit-scenario", function() {
-            const id = $(this).data("id");
-            const charId = getCharId();
-            extension_settings[extensionName].characters[charId][id].text = $(this).val();
-            saveSettingsDebounced();
+            
+            toastr.success("Сценарий добавлен!");
         });
 
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Scenario Setup:", error);
+        toastr.error(`Не удалось загрузить файл окна.`);
     }
 }
 
 function injectPuzzleButton() {
     if ($("#scenario-setup-button").length > 0) return;
+
     const targetButton = $("#advanced_div");
     if (targetButton.length > 0) {
-        const puzzleButton = $(`<div id="scenario-setup-button" class="menu_button fa-solid fa-puzzle-piece interactable" title="Scenario Setup" tabindex="0" role="button"></div>`);
-        targetButton.parent().prepend(puzzleButton);
-        puzzleButton.on("click", (e) => { e.stopPropagation(); showScenarioMenu(); });
+        const buttonContainer = targetButton.parent();
+        const puzzleButton = $(`
+            <div id="scenario-setup-button" 
+                 class="menu_button fa-solid fa-puzzle-piece interactable" 
+                 title="Scenario Setup" 
+                 tabindex="0" 
+                 role="button"
+                 style="display: flex; align-items: center; justify-content: center;">
+            </div>
+        `);
+        buttonContainer.prepend(puzzleButton);
+        puzzleButton.on("click", (e) => {
+            e.stopPropagation();
+            showScenarioMenu();
+        });
     }
 }
 
