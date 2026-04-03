@@ -9,7 +9,8 @@
 
 .delete-scenario,
 .edit-scenario,
-.insert-scenario {
+.insert-scenario,
+.toggle-scenario {
     color: var(--white75);
     transition: opacity 0.2s, color 0.2s;
 }
@@ -23,5 +24,9 @@
 }
 .insert-scenario:hover {
     color: #4488ff;
+    opacity: 1;
+}
+.toggle-scenario:hover {
+    color: #ffaa44;
     opacity: 1;
 }
