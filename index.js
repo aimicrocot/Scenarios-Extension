@@ -273,6 +273,15 @@ function showScenarioMenu() {
     `;
 
     callPopup(popupHtml, "text");
+
+    // Применяем скругление к popup после его создания
+    setTimeout(() => {
+        $(".popup").css({
+            "border-radius": "12px",
+            "overflow": "hidden"
+        });
+    }, 0);
+
     console.log("Scenario Setup: Окно открыто");
 
     loadSettings();
