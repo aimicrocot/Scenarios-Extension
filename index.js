@@ -37,21 +37,16 @@ function insertIntoDefaultScenario(text) {
 
     const currentText = $defaultScenario.val() || "";
 
-    // Если в поле уже есть текст, добавляем наш промпт
-    if (currentText.trim()) {
-        const newText = currentText + "\n\n" + text;
-        $defaultScenario.val(newText);
+    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
+    const newText = currentText.trim() ? currentText + "\n\n" + text : text;
+    $defaultScenario.val(newText);
 
-        // Триггерим событие изменения для обновления UI SillyTavern
-        $defaultScenario.trigger("input");
-        $defaultScenario.trigger("change");
+    // Триггерим событие изменения для обновления UI SillyTavern
+    $defaultScenario.trigger("input");
+    $defaultScenario.trigger("change");
 
-        toastr.success("Промпт добавлен в Scenario");
-        return true;
-    } else {
-        toastr.info("Поле Scenario пустое, промпт не добавлен");
-        return false;
-    }
+    toastr.success("Промпт добавлен в Scenario");
+    return true;
 }
 
 function updateTokenCounter() {
@@ -273,4 +268,3 @@ jQuery(async () => {
     injectPuzzleButton();
     loadSettings();
 });
-
