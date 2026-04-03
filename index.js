@@ -1,3 +1,5 @@
+// Рабочий index.js
+
 import { extension_settings, getContext } from "../../../extensions.js";
 import { callPopup, saveSettingsDebounced } from "../../../../script.js";
 
