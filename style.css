@@ -7,6 +7,17 @@
     background-color: var(--black75);
 }
 
+/* Скругление для всех popup элементов, содержащих наше окно */
+body .popup {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
+#scenario-manager-window {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
 .delete-scenario,
 .edit-scenario,
 .insert-scenario,
