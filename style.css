@@ -7,21 +7,6 @@
     background-color: var(--black75);
 }
 
-/* Скругление popup */
-body .popup,
-body div.popup,
-body #shadow_popup,
-body .popup-content,
-body .popup > div {
-    border-radius: 12px !important;
-    overflow: hidden !important;
-}
-
-#scenario-manager-window {
-    border-radius: 12px !important;
-    overflow: hidden !important;
-}
-
 .delete-scenario,
 .edit-scenario,
 .insert-scenario,
