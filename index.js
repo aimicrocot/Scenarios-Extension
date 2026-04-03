@@ -274,13 +274,21 @@ function showScenarioMenu() {
 
     callPopup(popupHtml, "text");
 
-    // Применяем скругление к popup после его создания
-    setTimeout(() => {
-        $(".popup").css({
-            "border-radius": "12px",
-            "overflow": "hidden"
-        });
-    }, 0);
+    // Применяем скругление к popup
+    const applyRounding = () => {
+        const $popup = $("#scenario-manager-window").closest(".popup");
+        if ($popup.length > 0) {
+            $popup.css({
+                "border-radius": "12px",
+                "overflow": "hidden"
+            });
+        }
+    };
+
+    // Пробуем несколько раз на случай задержки рендера
+    setTimeout(applyRounding, 0);
+    setTimeout(applyRounding, 50);
+    setTimeout(applyRounding, 100);
 
     console.log("Scenario Setup: Окно открыто");
 
