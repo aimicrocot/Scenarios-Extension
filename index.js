@@ -35,6 +35,13 @@ function insertIntoDefaultScenario(text) {
     }
 
     const currentText = $defaultScenario.val() || "";
+
+    // Проверяем, есть ли уже этот текст в поле
+    if (currentText.includes(text)) {
+        toastr.warning("Этот сценарий уже добавлен в Scenario");
+        return false;
+    }
+
     const newText = currentText.trim() ? currentText + "\n\n" + text : text;
     $defaultScenario.val(newText);
 
