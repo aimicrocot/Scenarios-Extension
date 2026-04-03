@@ -19,13 +19,13 @@ function loadSettings() {
 
 function escapeHtml(str) {
     return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
+        if (m === '&') return '&';
+        if (m === '<') return '<';
+        if (m === '>') return '>';
         return m;
     });
 }
-// Добавьте эту функцию после функции escapeHtml
+
 function insertIntoDefaultScenario(text) {
     // Ищем textarea дефолтного сценария
     const $defaultScenario = $("#scenario_pole");
@@ -94,9 +94,9 @@ function editScenario(scenarioId) {
     `;
 
     callPopup(editHtml, "text");
-    
+
     $("#edit-scenario-text").val(scenario.text);
-    
+
     $("#edit-save-btn").off("click").on("click", () => {
         const newText = $("#edit-scenario-text").val().trim();
         if (!newText) {
@@ -110,7 +110,7 @@ function editScenario(scenarioId) {
         toastr.success("Сценарий обновлён");
         $(".popup").remove();
     });
-    
+
     $("#edit-cancel-btn").off("click").on("click", () => {
         $(".popup").remove();
     });
@@ -119,12 +119,12 @@ function editScenario(scenarioId) {
 function renderScenarioList() {
     const $listContainer = $("#scenario-list");
     const scenarios = extension_settings[extensionName].scenarios || [];
-    
+
     if (scenarios.length === 0) {
         $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>');
         return;
     }
-    
+
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
         const date = new Date(scenario.created).toLocaleString();
@@ -136,6 +136,7 @@ function renderScenarioList() {
                     ${safeText}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Вставить в Scenario" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                 </div>
@@ -144,12 +145,20 @@ function renderScenarioList() {
     });
     html += '</ul>';
     $listContainer.html(html);
-    
+
+    $(".insert-scenario").off("click").on("click", function() {
+        const id = $(this).data("id");
+        const scenario = scenarios.find(s => String(s.id) === String(id));
+        if (scenario) {
+            insertIntoDefaultScenario(scenario.text);
+        }
+    });
+
     $(".delete-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         deleteScenario(id);
     });
-    
+
     $(".edit-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         editScenario(id);
@@ -160,20 +169,20 @@ function showScenarioMenu() {
     const popupHtml = `
 <div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
     <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-        <i class="fa-solid fa-puzzle-piece"></i> 
+        <i class="fa-solid fa-puzzle-piece"></i>
         <span>Управление сценариями</span>
     </h3>
-    
+
     <div id="scenario-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid var(--smart-line-color);">
         <p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>
     </div>
 
     <div class="scenario-edit-area">
-        <textarea 
-            id="new_scenario_text" 
-            placeholder="(Обстоятельства и контекст этого диалога)" 
-            class="text_pole" 
-            rows="5" 
+        <textarea
+            id="new_scenario_text"
+            placeholder="(Обстоятельства и контекст этого диалога)"
+            class="text_pole"
+            rows="5"
             style="width: 100%; background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;"
         ></textarea>
     </div>
@@ -187,13 +196,13 @@ function showScenarioMenu() {
     </div>
 </div>
     `;
-    
+
     callPopup(popupHtml, "text");
     console.log("Scenario Setup: Окно открыто");
 
     loadSettings();
     renderScenarioList();
-    
+
     $("#add_scenario_btn").off("click").on("click", () => {
         const $textarea = $("#new_scenario_text");
         const text = $textarea.val().trim();
@@ -201,13 +210,13 @@ function showScenarioMenu() {
             toastr.warning("Введите текст сценария");
             return;
         }
-        
+
         const newScenario = {
             id: String(Date.now()),
             text: text,
             created: Date.now()
         };
-        
+
         extension_settings[extensionName].scenarios.push(newScenario);
         saveSettingsDebounced();
         renderScenarioList();
@@ -215,7 +224,7 @@ function showScenarioMenu() {
         updateTokenCounter();
         toastr.success("Сценарий добавлен");
     });
-    
+
     $("#new_scenario_text").off("input").on("input", updateTokenCounter);
     updateTokenCounter();
 }
@@ -227,10 +236,10 @@ function injectPuzzleButton() {
     if (targetButton.length > 0) {
         const buttonContainer = targetButton.parent();
         const puzzleButton = $(`
-            <div id="scenario-setup-button" 
-                 class="menu_button fa-solid fa-puzzle-piece interactable" 
-                 title="Scenario Setup" 
-                 tabindex="0" 
+            <div id="scenario-setup-button"
+                 class="menu_button fa-solid fa-puzzle-piece interactable"
+                 title="Scenario Setup"
+                 tabindex="0"
                  role="button"
                  style="display: flex; align-items: center; justify-content: center;">
             </div>
@@ -253,14 +262,15 @@ jQuery(async () => {
             }
         }
     }, 500);
-    
+
     const observer = new MutationObserver(() => {
         if ($("#advanced_div").length > 0 && $("#scenario-setup-button").length === 0) {
             injectPuzzleButton();
         }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    
+
     injectPuzzleButton();
     loadSettings();
 });
+
