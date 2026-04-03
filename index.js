@@ -25,6 +25,34 @@ function escapeHtml(str) {
         return m;
     });
 }
+// Добавьте эту функцию после функции escapeHtml
+function insertIntoDefaultScenario(text) {
+    // Ищем textarea дефолтного сценария
+    const $defaultScenario = $("#scenario_pole");
+
+    if ($defaultScenario.length === 0) {
+        toastr.warning("Не удалось найти поле сценария SillyTavern");
+        return false;
+    }
+
+    const currentText = $defaultScenario.val() || "";
+
+    // Если в поле уже есть текст, добавляем наш промпт
+    if (currentText.trim()) {
+        const newText = currentText + "\n\n" + text;
+        $defaultScenario.val(newText);
+
+        // Триггерим событие изменения для обновления UI SillyTavern
+        $defaultScenario.trigger("input");
+        $defaultScenario.trigger("change");
+
+        toastr.success("Промпт добавлен в Scenario");
+        return true;
+    } else {
+        toastr.info("Поле Scenario пустое, промпт не добавлен");
+        return false;
+    }
+}
 
 function updateTokenCounter() {
     const text = $("#new_scenario_text").val() || "";
