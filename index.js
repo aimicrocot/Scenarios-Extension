@@ -27,7 +27,6 @@ function escapeHtml(str) {
 }
 
 function insertIntoDefaultScenario(text) {
-    // Ищем textarea дефолтного сценария
     const $defaultScenario = $("#scenario_pole");
 
     if ($defaultScenario.length === 0) {
@@ -36,12 +35,9 @@ function insertIntoDefaultScenario(text) {
     }
 
     const currentText = $defaultScenario.val() || "";
-
-    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
     const newText = currentText.trim() ? currentText + "\n\n" + text : text;
     $defaultScenario.val(newText);
 
-    // Триггерим событие изменения для обновления UI SillyTavern
     $defaultScenario.trigger("input");
     $defaultScenario.trigger("change");
 
@@ -62,13 +58,8 @@ function removeFromDefaultScenario(text) {
         return false;
     }
 
-    // Удаляем текст сценария из поля
     let newText = currentText.replace(text, "");
-
-    // Убираем лишние переносы строк (больше двух подряд)
     newText = newText.replace(/\n{3,}/g, "\n\n");
-
-    // Убираем переносы в начале и конце
     newText = newText.trim();
 
     $defaultScenario.val(newText);
@@ -84,16 +75,43 @@ function updateTokenCounter() {
     $(".token-counter").text(estimatedTokens);
 }
 
+function toggleScenario(scenarioId) {
+    const scenarios = extension_settings[extensionName].scenarios || [];
+    const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
+
+    if (!scenario) {
+        toastr.warning("Сценарий не найден");
+        return;
+    }
+
+    // Переключаем состояние
+    scenario.hidden = !scenario.hidden;
+
+    if (scenario.hidden) {
+        // Скрываем - удаляем из дефолтного поля
+        removeFromDefaultScenario(scenario.text);
+        toastr.info("Сценарий скрыт");
+    } else {
+        // Показываем - добавляем в дефолтное поле
+        insertIntoDefaultScenario(scenario.text);
+        toastr.info("Сценарий активирован");
+    }
+
+    saveSettingsDebounced();
+    renderScenarioList();
+}
+
 function deleteScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
     if (index !== -1) {
         const scenario = scenarios[index];
 
-        // Удаляем из дефолтного поля Scenario
-        removeFromDefaultScenario(scenario.text);
+        // Удаляем из дефолтного поля Scenario только если сценарий был активен
+        if (!scenario.hidden) {
+            removeFromDefaultScenario(scenario.text);
+        }
 
-        // Удаляем из списка
         scenarios.splice(index, 1);
         extension_settings[extensionName].scenarios = scenarios;
         saveSettingsDebounced();
@@ -133,7 +151,16 @@ function editScenario(scenarioId) {
             toastr.warning("Текст не может быть пустым");
             return;
         }
-        scenario.text = newText;
+
+        // Если сценарий активен, обновляем текст в дефолтном поле
+        if (!scenario.hidden) {
+            removeFromDefaultScenario(scenario.text);
+            scenario.text = newText;
+            insertIntoDefaultScenario(scenario.text);
+        } else {
+            scenario.text = newText;
+        }
+
         scenario.updated = Date.now();
         saveSettingsDebounced();
         renderScenarioList();
@@ -159,13 +186,18 @@ function renderScenarioList() {
     scenarios.forEach(scenario => {
         const date = new Date(scenario.created).toLocaleString();
         const safeText = escapeHtml(scenario.text);
+        const isHidden = scenario.hidden || false;
+        const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
+        const opacity = isHidden ? '0.4' : '1';
+
         html += `
-            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start;">
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity};">
                 <div style="flex: 1;">
                     <strong>${date}</strong><br>
                     ${safeText}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Показать' : 'Скрыть'}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Вставить в Scenario" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
@@ -175,6 +207,11 @@ function renderScenarioList() {
     });
     html += '</ul>';
     $listContainer.html(html);
+
+    $(".toggle-scenario").off("click").on("click", function() {
+        const id = $(this).data("id");
+        toggleScenario(id);
+    });
 
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
@@ -244,7 +281,8 @@ function showScenarioMenu() {
         const newScenario = {
             id: String(Date.now()),
             text: text,
-            created: Date.now()
+            created: Date.now(),
+            hidden: false
         };
 
         extension_settings[extensionName].scenarios.push(newScenario);
