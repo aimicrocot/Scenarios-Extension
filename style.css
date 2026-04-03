@@ -7,6 +7,11 @@
     background-color: var(--black75);
 }
 
+#scenario-manager-window {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
 .delete-scenario,
 .edit-scenario,
 .insert-scenario,
