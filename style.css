@@ -30,3 +30,46 @@
     color: #ffaa44;
     opacity: 1;
 }
+
+/* Стили для окна управления сценариями */
+#scenario-manager-window {
+    background: rgba(0, 0, 0, 0.85) !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Скругление для списка сценариев */
+#scenario-list {
+    border-radius: 8px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Скругление для textarea */
+#new_scenario_text {
+    border-radius: 8px !important;
+    padding: 10px !important;
+}
+
+/* Скругление для кнопки добавления */
+#add_scenario_btn {
+    border-radius: 8px !important;
+}
+
+/* Скругление для окна редактирования */
+#edit-scenario-popup {
+    background: rgba(0, 0, 0, 0.85) !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+}
+
+#edit-scenario-text {
+    border-radius: 8px !important;
+    padding: 10px !important;
+}
+
+#edit-save-btn,
+#edit-cancel-btn {
+    border-radius: 8px !important;
+}
