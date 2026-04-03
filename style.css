@@ -1,3 +1,4 @@
+
 #scenario-setup-button {
     cursor: pointer;
     color: var(--white75);
@@ -8,6 +9,17 @@
 }
 
 #scenario-manager-window {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Скругление для popup контейнера */
+.popup:has(#scenario-manager-window) {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.popup:has(#scenario-manager-window) .popup-content {
     border-radius: 12px;
     overflow: hidden;
 }
