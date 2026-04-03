@@ -36,11 +36,13 @@ function insertIntoDefaultScenario(text) {
 
     const currentText = $defaultScenario.val() || "";
 
+    // Проверяем, есть ли уже точно такой же текст в поле
     if (currentText.includes(text)) {
         toastr.warning("Этот сценарий уже добавлен в Scenario");
         return false;
     }
 
+    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
     const newText = currentText.trim() ? currentText + "\n\n" + text : text;
     $defaultScenario.val(newText);
 
@@ -90,12 +92,15 @@ function toggleScenario(scenarioId) {
         return;
     }
 
+    // Переключаем состояние
     scenario.hidden = !scenario.hidden;
 
     if (scenario.hidden) {
+        // Скрываем - удаляем из дефолтного поля
         removeFromDefaultScenario(scenario.text);
         toastr.info("Сценарий скрыт");
     } else {
+        // Показываем - добавляем в дефолтное поле
         insertIntoDefaultScenario(scenario.text);
         toastr.info("Сценарий активирован");
     }
@@ -110,6 +115,7 @@ function deleteScenario(scenarioId) {
     if (index !== -1) {
         const scenario = scenarios[index];
 
+        // Удаляем из дефолтного поля Scenario только если сценарий был активен
         if (!scenario.hidden) {
             removeFromDefaultScenario(scenario.text);
         }
@@ -154,6 +160,7 @@ function editScenario(scenarioId) {
             return;
         }
 
+        // Если сценарий активен, обновляем текст в дефолтном поле
         if (!scenario.hidden) {
             removeFromDefaultScenario(scenario.text);
             scenario.text = newText;
