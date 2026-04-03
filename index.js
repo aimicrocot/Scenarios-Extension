@@ -1,5 +1,3 @@
-// Рабочий index.js
-
 import { extension_settings, getContext } from "../../../extensions.js";
 import { callPopup, saveSettingsDebounced } from "../../../../script.js";
 
@@ -51,6 +49,35 @@ function insertIntoDefaultScenario(text) {
     return true;
 }
 
+function removeFromDefaultScenario(text) {
+    const $defaultScenario = $("#scenario_pole");
+
+    if ($defaultScenario.length === 0) {
+        return false;
+    }
+
+    const currentText = $defaultScenario.val() || "";
+
+    if (!currentText.includes(text)) {
+        return false;
+    }
+
+    // Удаляем текст сценария из поля
+    let newText = currentText.replace(text, "");
+
+    // Убираем лишние переносы строк (больше двух подряд)
+    newText = newText.replace(/\n{3,}/g, "\n\n");
+
+    // Убираем переносы в начале и конце
+    newText = newText.trim();
+
+    $defaultScenario.val(newText);
+    $defaultScenario.trigger("input");
+    $defaultScenario.trigger("change");
+
+    return true;
+}
+
 function updateTokenCounter() {
     const text = $("#new_scenario_text").val() || "";
     const estimatedTokens = Math.ceil(text.length / 4);
@@ -61,6 +88,12 @@ function deleteScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
     if (index !== -1) {
+        const scenario = scenarios[index];
+
+        // Удаляем из дефолтного поля Scenario
+        removeFromDefaultScenario(scenario.text);
+
+        // Удаляем из списка
         scenarios.splice(index, 1);
         extension_settings[extensionName].scenarios = scenarios;
         saveSettingsDebounced();
