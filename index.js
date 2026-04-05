@@ -204,7 +204,7 @@ function renderScenarioList() {
                     <strong>${date}</strong><br>
                     ${safeText}
                 </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0; max-width: 120px;"">
+                <div style="display: flex; gap: 8px; flex-shrink: 0; max-width: 120px;">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Показать' : 'Скрыть'}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Вставить в Scenario" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
