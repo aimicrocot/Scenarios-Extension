@@ -77,12 +77,6 @@ function removeFromDefaultScenario(text) {
     return true;
 }
 
-function updateTokenCounter() {
-    const text = $("#new_scenario_text").val() || "";
-    const estimatedTokens = Math.ceil(text.length / 4);
-    $(".token-counter").text(estimatedTokens);
-}
-
 function toggleScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
