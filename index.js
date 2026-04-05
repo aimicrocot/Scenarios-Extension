@@ -199,12 +199,12 @@ function renderScenarioList() {
         const opacity = isHidden ? '0.4' : '1';
 
         html += `
-            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 4px;">
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 8px;">
                 <div style="flex: 1; text-align: left;">
                     <strong>${date}</strong><br>
                     ${safeText}
                 </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                <div style="display: flex; gap: 8px; flex-shrink: 0; max-width: 120px;"">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Показать' : 'Скрыть'}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Вставить в Scenario" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
