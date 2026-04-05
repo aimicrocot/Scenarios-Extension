@@ -77,12 +77,6 @@ function removeFromDefaultScenario(text) {
     return true;
 }
 
-function updateTokenCounter() {
-    const text = $("#new_scenario_text").val() || "";
-    const estimatedTokens = Math.ceil(text.length / 4);
-    $(".token-counter").text(estimatedTokens);
-}
-
 function toggleScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
@@ -263,14 +257,13 @@ function showScenarioMenu() {
     </div>
 
     <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0</span>
         <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
             <span>Добавить сценарий</span>
         </button>
     </div>
 </div>
-    `;
+    `
 
     callPopup(popupHtml, "text");
     console.log("Scenario Setup: Окно открыто");
@@ -297,12 +290,8 @@ function showScenarioMenu() {
         saveSettingsDebounced();
         renderScenarioList();
         $textarea.val("");
-        updateTokenCounter();
         toastr.success("Сценарий добавлен");
     });
-
-    $("#new_scenario_text").off("input").on("input", updateTokenCounter);
-    updateTokenCounter();
 }
 
 function injectPuzzleButton() {
