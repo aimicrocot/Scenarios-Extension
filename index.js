@@ -139,15 +139,14 @@ function editScenario(scenarioId) {
     }
 
     const editHtml = `
-        <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
-            <h3>Редактирование сценария</h3>
-            <textarea id="edit-scenario-text" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button id="edit-cancel-btn" class="menu_button">Отмена</button>
-                <button id="edit-save-btn" class="menu_button">Сохранить</button>
-            </div>
+    <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
+        <h3>Редактирование сценария</h3>
+        <textarea id="edit-scenario-text" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
+        <div style="display: flex; justify-content: flex-end;">
+            <button id="edit-save-btn" class="menu_button">Сохранить</button>
         </div>
-    `;
+    </div>
+`;
 
     callPopup(editHtml, "text");
 
@@ -173,10 +172,6 @@ function editScenario(scenarioId) {
         saveSettingsDebounced();
         renderScenarioList();
         toastr.success("Сценарий обновлён");
-        $(".popup").remove();
-    });
-
-    $("#edit-cancel-btn").off("click").on("click", () => {
         $(".popup").remove();
     });
 }
