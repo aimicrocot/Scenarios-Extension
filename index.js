@@ -199,7 +199,7 @@ function renderScenarioList() {
         const opacity = isHidden ? '0.4' : '1';
 
         html += `
-            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 8px;">
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 4px;">
                 <div style="flex: 1; text-align: left;">
                     <strong>${date}</strong><br>
                     ${safeText}
