@@ -190,7 +190,7 @@ function renderScenarioList() {
         return;
     }
 
-    let html = '<ul style="margin: 0; padding-left: 1.2em;">';
+    let html = '<ul style="margin: 0; padding-left: none;">';
     scenarios.forEach(scenario => {
         const date = new Date(scenario.created).toLocaleString();
         const safeText = escapeHtml(scenario.text);
