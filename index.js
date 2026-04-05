@@ -190,7 +190,7 @@ function renderScenarioList() {
         return;
     }
 
-    let html = '<ul style="margin: 0; padding-left: 0; list-style: none;">';
+    let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
         const date = new Date(scenario.created).toLocaleString();
         const safeText = escapeHtml(scenario.text);
@@ -199,16 +199,16 @@ function renderScenarioList() {
         const opacity = isHidden ? '0.4' : '1';
 
         html += `
-            <li style="margin-bottom: 12px; position: relative; padding: 8px 100px 8px 8px; text-align: center; opacity: ${opacity}; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <div>
-                    <strong style="font-size: 0.85em; opacity: 0.7;">${date}</strong><br>
-                    <span style="font-size: 0.95em;">${safeText}</span>
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity};">
+                <div style="flex: 1;">
+                    <strong>${date}</strong><br>
+                    ${safeText}
                 </div>
-                <div style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Показать' : 'Скрыть'}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Вставить в Scenario" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" title="Редактировать" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" title="Удалить" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                 </div>
             </li>
         `;
@@ -349,4 +349,3 @@ jQuery(async () => {
     injectPuzzleButton();
     loadSettings();
 });
-
