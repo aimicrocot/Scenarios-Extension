@@ -79,8 +79,8 @@ function removeFromDefaultScenario(text) {
 
 function updateTokenCounter() {
     const text = $("#new_scenario_text").val() || "";
-    const estimatedTokens = Math.ceil(text.length / 4);
-    $(".token-counter").text(estimatedTokens);
+    const charCount = text.length;
+    $(".token-counter").text(`${charCount} символов`);
 }
 
 function toggleScenario(scenarioId) {
@@ -263,7 +263,7 @@ function showScenarioMenu() {
     </div>
 
     <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0</span>
+        <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0 символов</span>
         <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
             <span>Добавить сценарий</span>
