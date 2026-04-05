@@ -1,4 +1,9 @@
 /* Стили только для кнопки расширения */
+/* Скругление верхних углов всплывающего окна */
+#dialogue_popup_holder {
+    border-radius: 10px 10px 0 0;
+}
+
 #scenario-setup-button {
     cursor: pointer;
     color: var(--white75);
