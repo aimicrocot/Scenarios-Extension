@@ -200,7 +200,7 @@ function renderScenarioList() {
 
         html += `
             <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 12px;">
-                <div style="flex: 1; text-align: left;">
+                <div style="flex: 1; text-align: left; margin-right: 15px;"">
                     <strong>${date}</strong><br>
                     ${safeText}
                 </div>
