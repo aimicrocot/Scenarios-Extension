@@ -43,9 +43,7 @@ function insertIntoDefaultScenario(text) {
     }
 
     // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
-    const newText = currentText.trim() ? currentText + "
-
-" + text : text;
+    const newText = currentText.trim() ? currentText + "\n\n" + text : text;
     $defaultScenario.val(newText);
 
     $defaultScenario.trigger("input");
@@ -69,10 +67,7 @@ function removeFromDefaultScenario(text) {
     }
 
     let newText = currentText.replace(text, "");
-    newText = newText.replace(/
-{3,}/g, "
-
-");
+    newText = newText.replace(/\n{3,}/g, "\n\n");
     newText = newText.trim();
 
     $defaultScenario.val(newText);
@@ -195,7 +190,7 @@ function renderScenarioList() {
         return;
     }
 
-    let html = '<ul style="margin: 0; padding-left: 0; list-style: none;">';
+    let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
         const date = new Date(scenario.created).toLocaleString();
         const safeText = escapeHtml(scenario.text);
@@ -204,8 +199,8 @@ function renderScenarioList() {
         const opacity = isHidden ? '0.4' : '1';
 
         html += `
-            <li style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 12px;">
-                <div style="flex: 1; text-align: left; padding-right: 10px;">
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity};">
+                <div style="flex: 1;">
                     <strong>${date}</strong><br>
                     ${safeText}
                 </div>
@@ -354,4 +349,3 @@ jQuery(async () => {
     injectPuzzleButton();
     loadSettings();
 });
-
