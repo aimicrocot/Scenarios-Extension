@@ -257,7 +257,6 @@ function showScenarioMenu() {
     </div>
 
     <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0</span>
         <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
             <span>Добавить сценарий</span>
@@ -294,10 +293,6 @@ function showScenarioMenu() {
         updateTokenCounter();
         toastr.success("Сценарий добавлен");
     });
-
-    $("#new_scenario_text").off("input").on("input", updateTokenCounter);
-    updateTokenCounter();
-}
 
 function injectPuzzleButton() {
     if ($("#scenario-setup-button").length > 0) return;
