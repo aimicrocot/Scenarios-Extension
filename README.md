@@ -1,7 +1,33 @@
+# Eng
+<details>
 # Scenarios-Extension
-An extension that adds a Scripts tab to allow you to add multiple scripts to a single bot
+An extension that adds a Scripts tab to allow you to add multiple scripts to a single bot Now you don't need to make 10 identical bots for different scenarios.
 
-Теперь не надо делать 10 одинаковых ботов под разные сценарии.
+# What it can do:
+
+— Add/delete/edit scenario texts; they go into the default SillyTavern field named Scenario
+
+— Toggle the visibility of scenario texts; hidden ones will be erased from the default Scenario field (but remain in the extension window itself)
+
+— Combine scenarios: if you add multiple texts, they will appear together in the Scenario field
+
+— Count the number of characters entered
+
+— Adapt to the theme appearance
+
+# How to use:
+
+1. Click the Puzzle button (where the Character Definition is)
+
+2. Enter the scenario text and click the Add Scenario button
+
+3. Click the Arrow button at the top right to send the scenario text as a prompt to the default Scenario window (!)
+
+4. Besides the Arrow, there will be a Pencil button to edit the scenario text; the Trash can deletes the scenario from the extension window; the Eye erases the scenario from the Scenario window but leaves it in the extension window
+5. </details>
+
+# Scenarios-Extension
+Позволяет добавлять одному боту много сценариев и отпрпвлять в дефольтное окно Scenario в SillyTavern. Теперь не надо делать 10 одинаковых ботов под разные сценарии.
 
 # Что умеет:
 
