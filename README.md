@@ -25,7 +25,7 @@ An extension that adds a scenarios tab to allow you to add multiple scenarios to
 4. Besides the Arrow, there will be a Pencil button to edit the scenario text; the Trash can deletes the scenario from the extension window; the Eye erases the scenario from the Scenario window but leaves it in the extension window
 </details>
 
-# Scenarios-Extension
+# О расширении
 Позволяет добавлять одному боту много сценариев и отпрпвлять в дефолтное окно Scenario в SillyTavern. Теперь не надо делать 10 одинаковых ботов под разные сценарии.
 
 # Что умеет:
