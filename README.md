@@ -36,7 +36,7 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 5. ### Contacts
 
-My Telegram-channel @sillytavern1
+My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 </details>
 
 ## Прочти меня
@@ -74,5 +74,5 @@ My Telegram-channel @sillytavern1
 
 ### Контакты
 
-Мой Телеграм-канал @sillytavern1
+Мой Телеграм-канал [@sillytavern1](https://t.me/sillytavern1)
 
