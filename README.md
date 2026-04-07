@@ -27,7 +27,7 @@ An extension that adds a Scripts tab to allow you to add multiple scripts to a s
 5. </details>
 
 # Scenarios-Extension
-Позволяет добавлять одному боту много сценариев и отпрпвлять в дефольтное окно Scenario в SillyTavern. Теперь не надо делать 10 одинаковых ботов под разные сценарии.
+Позволяет добавлять одному боту много сценариев и отпрпвлять в дефолтное окно Scenario в SillyTavern. Теперь не надо делать 10 одинаковых ботов под разные сценарии.
 
 # Что умеет:
 
