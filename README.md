@@ -1,7 +1,6 @@
-# Eng
+# Eng ReadMe
 <details>
-  
-An extension that adds a Scripts tab to allow you to add multiple scripts to a single bot Now you don't need to make 10 identical bots for different scenarios.
+An extension that adds a scenarios tab to allow you to add multiple scenarios to a single bot. Now you don't need to make 10 identical bots for different scenarios.
 
 # What it can do:
 
