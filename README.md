@@ -6,11 +6,11 @@ An extension that adds a scenarios tab to allow you to add multiple scenarios to
 
 — Add/delete/edit scenario texts; they go into the default SillyTavern field named Scenario
 
-— Toggle the visibility of scenario texts; hidden ones will be erased from the default Scenario field (but remain in the extension window itself)
+— Toggle the visibility of scenario texts; hidden ones will be erased from the default Scenario window (but remain in the extension window itself)
 
 — Combine scenarios: if you add multiple texts, they will appear together in the Scenario field
 
-— Count the number of characters entered
+— Count the number of symbols entered
 
 — Adapt to the theme appearance
 
