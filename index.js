@@ -182,16 +182,20 @@ function renderScenarioList() {
 
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
-        const date = new Date(scenario.created).toLocaleString();
         const safeText = escapeHtml(scenario.text);
         const isHidden = scenario.hidden || false;
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
 
+        // Создаем превью: берем первые 5 слов и добавляем многоточие
+        const words = scenario.text.split(/\s+/);
+        const previewText = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '...');
+        const safePreview = escapeHtml(previewText);
+
         html += `
             <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 8px;">
                 <div style="flex: 1; text-align: left;">
-                    <strong>${date}</strong><br>
+                    <strong>${safePreview}</strong><br>
                     ${safeText}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0; max-width: 120px;">
@@ -206,6 +210,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
+    // Привязка событий (остается без изменений)
     $(".toggle-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         toggleScenario(id);
