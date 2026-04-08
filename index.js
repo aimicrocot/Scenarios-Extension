@@ -27,55 +27,38 @@ function escapeHtml(str) {
 }
 
 function insertIntoDefaultScenario(text) {
-    // Находим основное поле Scenario в SillyTavern
-    const $scenarioField = $("#scenario_field"); 
-    const currentText = $scenarioField.val().trim();
-    const newText = text.trim();
+    const $scenarioField = $("#scenario_field");
+    
+    // Проверка: нашли ли мы вообще это поле в SillyTavern?
+    if ($scenarioField.length === 0) {
+        console.error("Extension: #scenario_field not found!");
+        toastr.error("Main Scenario field not found");
+        return;
+    }
 
-    // ИСПРАВЛЕНИЕ: Блокируем добавление ТОЛЬКО если всё содержимое поля 
-    // один-в-один совпадает с новым текстом.
+    const val = $scenarioField.val();
+    const currentText = val ? val.trim() : "";
+    const newText = text ? text.trim() : "";
+
+    // Тот самый фикс "полной идентичности"
+    // Мы сравниваем всё содержимое поля с новым текстом
     if (currentText === newText) {
         toastr.info("This exact scenario is already set");
         return;
     }
 
-    // Если в поле уже что-то есть, просто добавляем новый текст с новой строки
+    // Логика добавления
     if (currentText.length > 0) {
+        // Добавляем с новой строки, если там уже что-то было
         $scenarioField.val(currentText + "\n" + newText);
     } else {
         $scenarioField.val(newText);
     }
 
-    // Обязательно вызываем события, чтобы SillyTavern "понял", что текст изменился и сохранил его
+    // Триггерим события, чтобы SillyTavern сохранил изменения
     $scenarioField.trigger("input").trigger("change");
     
     toastr.success("Scenario added to main field");
-}
-
-function toggleScenario(scenarioId) {
-    const scenarios = extension_settings[extensionName].scenarios || [];
-    const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
-
-    if (!scenario) {
-        toastr.warning("Scenario not found");
-        return;
-    }
-
-    // Переключаем состояние
-    scenario.hidden = !scenario.hidden;
-
-    if (scenario.hidden) {
-        // Скрываем - удаляем из дефолтного поля
-        removeFromDefaultScenario(scenario.text);
-        toastr.info("Scenario hidden");
-    } else {
-        // Показываем - добавляем в дефолтное поле
-        insertIntoDefaultScenario(scenario.text);
-        toastr.info("Scenario activated");
-    }
-
-    saveSettingsDebounced();
-    renderScenarioList();
 }
 
 function deleteScenario(scenarioId) {
