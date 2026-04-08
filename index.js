@@ -139,12 +139,11 @@ function editScenario(scenarioId) {
     }
 
     const editHtml = `
-    <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
-        <h3 style="margin: 0; padding-top: 15px; text-align: center;">Editing a Scenario</h3>
+    <div id="edit-scenario-popup" style="max-width: 90vw; width: 100%; margin: 0 auto;">
+        <h3 style="margin-top: 0;">Editing a Scenario</h3>
+        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
         
-        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 15px 0; box-sizing: border-box;"></textarea>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <button id="edit-back-btn" class="menu_button">Back</button>
             <button id="edit-save-btn" class="menu_button">Save</button>
         </div>
@@ -155,10 +154,12 @@ function editScenario(scenarioId) {
 
     $("#edit-scenario-text").val(scenario.text);
 
+    // Возврат в главное меню без сохранения
     $("#edit-back-btn").off("click").on("click", () => {
         showScenarioMenu(); 
     });
 
+    // Сохранение и возврат в главное меню
     $("#edit-save-btn").off("click").on("click", () => {
         const newText = $("#edit-scenario-text").val().trim();
         if (!newText) {
