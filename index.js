@@ -17,22 +17,27 @@ function loadSettings() {
     }
 }
 
+// Исправлено экранирование спецсимволов
 function escapeHtml(str) {
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&';
-        if (m === '<') return '<';
-        if (m === '>') return '>';
-        return m;
+    if (!str) return "";
+    return str.replace(/[&<>"']/g, function(m) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[m];
     });
 }
 
 function insertIntoDefaultScenario(text) {
-    const $scenarioField = $("#scenario_field");
+    // Пробуем найти поле по ID или по имени (для разных версий интерфейса)
+    const $scenarioField = $("#scenario_field, [name='scenario_field']");
     
-    // Проверка: нашли ли мы вообще это поле в SillyTavern?
     if ($scenarioField.length === 0) {
         console.error("Extension: #scenario_field not found!");
-        toastr.error("Main Scenario field not found");
+        toastr.error("Please open the Character Editor (pencil icon) first!");
         return;
     }
 
@@ -40,45 +45,55 @@ function insertIntoDefaultScenario(text) {
     const currentText = val ? val.trim() : "";
     const newText = text ? text.trim() : "";
 
-    // Тот самый фикс "полной идентичности"
-    // Мы сравниваем всё содержимое поля с новым текстом
     if (currentText === newText) {
         toastr.info("This exact scenario is already set");
         return;
     }
 
-    // Логика добавления
     if (currentText.length > 0) {
-        // Добавляем с новой строки, если там уже что-то было
         $scenarioField.val(currentText + "\n" + newText);
     } else {
         $scenarioField.val(newText);
     }
 
-    // Триггерим события, чтобы SillyTavern сохранил изменения
     $scenarioField.trigger("input").trigger("change");
-    
     toastr.success("Scenario added to main field");
+}
+
+// Добавлена недостающая функция удаления текста из основного поля
+function removeFromDefaultScenario(text) {
+    const $scenarioField = $("#scenario_field, [name='scenario_field']");
+    if ($scenarioField.length === 0) return;
+
+    let currentText = $scenarioField.val();
+    const targetText = text.trim();
+
+    // Удаляем конкретный кусок текста и лишние переносы строк
+    const escapedText = targetText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp('(\\n|^)' + escapedText + '(\\n|$)', 'g');
+    
+    currentText = currentText.replace(regex, '$1').trim();
+    
+    $scenarioField.val(currentText).trigger("input").trigger("change");
 }
 
 function deleteScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
+    
     if (index !== -1) {
         const scenario = scenarios[index];
 
-        // Удаляем из дефолтного поля Scenario только если сценарий был активен
         if (!scenario.hidden) {
             removeFromDefaultScenario(scenario.text);
         }
 
         scenarios.splice(index, 1);
-        extension_settings[extensionName].scenarios = scenarios;
         saveSettingsDebounced();
         renderScenarioList();
         toastr.info("The Scenario has been removed");
     } else {
-        toastr.warning("Unable to find uninstall Scenario");
+        toastr.warning("Unable to find Scenario");
     }
 }
 
@@ -136,19 +151,16 @@ function renderScenarioList() {
     const context = getContext();
     const currentCharacter = context.characters[context.characterId]?.name;
 
-    // Если персонаж не выбран
     if (!currentCharacter) {
-        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Select a character to manage scenarios...</p>');
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Select a character...</p>');
         return;
     }
 
     const allScenarios = extension_settings[extensionName].scenarios || [];
-    
-    // Фильтруем список по текущему персонажу
     const scenarios = allScenarios.filter(s => s.character === currentCharacter);
 
     if (scenarios.length === 0) {
-        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">No scenarios for this character...</p>');
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">No scenarios...</p>');
         return;
     }
 
@@ -158,22 +170,7 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
 
-        // --- ЛОГИКА ОТОБРАЖЕНИЯ НАЗВАНИЯ ---
-        let displayTitle = "";
-        
-        if (scenario.title && scenario.title.trim() !== "") {
-            // Если есть сохраненное название, используем его
-            displayTitle = scenario.title;
-        } else {
-            // Если названия нет (старый сценарий), делаем превью из текста
-            const words = scenario.text.split(/\s+/).filter(w => w.length > 0);
-            let slice = words.slice(0, 5);
-            if (slice.length > 0) {
-                slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
-            }
-            displayTitle = slice.join(' ') + '...';
-        }
-
+        let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
         const safeTitle = escapeHtml(displayTitle);
 
         html += `
@@ -182,8 +179,8 @@ function renderScenarioList() {
                     <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Show' : 'Hide'}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                 </div>
@@ -193,23 +190,30 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Слушатели событий
-    $(".toggle-scenario").off("click").on("click", function() {
-        toggleScenario($(this).data("id"));
-    });
-
+    // Привязываем события через .attr для надежности
     $(".insert-scenario").off("click").on("click", function() {
-        const id = $(this).data("id");
+        const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) insertIntoDefaultScenario(scenario.text);
     });
 
     $(".delete-scenario").off("click").on("click", function() {
-        deleteScenario($(this).data("id"));
+        deleteScenario($(this).attr("data-id"));
     });
 
     $(".edit-scenario").off("click").on("click", function() {
-        editScenario($(this).data("id"));
+        editScenario($(this).attr("data-id"));
+    });
+    
+    // Toggle (скрытие/показ) - добавьте функцию если её нет, или я могу написать
+    $(".toggle-scenario").off("click").on("click", function() {
+        const id = $(this).attr("data-id");
+        const scenario = allScenarios.find(s => String(s.id) === String(id));
+        if (scenario) {
+            scenario.hidden = !scenario.hidden;
+            saveSettingsDebounced();
+            renderScenarioList();
+        }
     });
 }
 
@@ -257,8 +261,13 @@ function openAddTitlePopup(scenarioText) {
     });
 }
 
+// Счетчик символов
+function updateTokenCounter() {
+    const text = $("#new_scenario_text").val() || "";
+    $(".token-counter").text(`${text.length} symb.`);
+}
+
 function showScenarioMenu() {
-    // ... (весь HTML код popupHtml остается без изменений) ...
     const popupHtml = `
 <div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
     <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
@@ -310,7 +319,6 @@ function showScenarioMenu() {
             return;
         }
 
-        // ВМЕСТО сохранения вызываем окно ввода названия
         openAddTitlePopup(text);
     });
 
@@ -338,7 +346,6 @@ function injectPuzzleButton() {
             e.stopPropagation();
             showScenarioMenu();
         });
-        console.log("Scenario Setup: Button added");
     }
 }
 
