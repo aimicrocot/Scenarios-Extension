@@ -163,9 +163,8 @@ function renderScenarioList() {
         return;
     }
 
-    // ВАЖНО: Получаем актуальный текст из поля прямо сейчас
+    // Получаем текущий текст целиком
     const currentDefaultText = ($("#scenario_pole, #scenario_field").val() || "").trim();
-    const existingBlocks = currentDefaultText.split(/\n/).map(block => block.trim());
 
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
@@ -173,15 +172,16 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
         
-        // Проверка: есть ли этот текст в поле Scenario прямо сейчас
-        const isAlreadyAdded = existingBlocks.includes(scenario.text.trim());
+        // ИСПРАВЛЕНО: Проверяем вхождение текста целиком через includes
+        const scenarioTextTrimmed = scenario.text.trim();
+        const isAlreadyAdded = currentDefaultText.includes(scenarioTextTrimmed);
+        
         const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
 
-        // ЛОГИКА БЛОКИРОВКИ: Глаз недоступен, если текста нет в поле И он не в состоянии "скрыт"
-        // (Если он скрыт, значит мы его уже добавляли ранее, и на глаз нажать можно, чтобы вернуть текст)
+        // Блокировка глаза
         const isEyeDisabled = !isAlreadyAdded && !isHidden;
         const eyeCursor = isEyeDisabled ? 'not-allowed' : 'pointer';
-        const eyeOpacity = isEyeDisabled ? '0.15' : '0.7'; // Делаем очень тусклым, если нельзя нажать
+        const eyeOpacity = isEyeDisabled ? '0.15' : '0.7';
 
         let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
         const safeTitle = escapeHtml(displayTitle);
@@ -197,7 +197,7 @@ function renderScenarioList() {
                        data-disabled="${isEyeDisabled}" 
                        style="cursor: ${eyeCursor}; opacity: ${eyeOpacity};" 
                        title="${isEyeDisabled ? 'Insert scenario first' : 'Toggle visibility'}"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Insert into Scenario"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Insert"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Edit"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Delete"></i>
                 </div>
@@ -207,26 +207,28 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий
+    // Привязка событий (Insert)
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             insertIntoDefaultScenario(scenario.text);
-            renderScenarioList(); // ПЕРЕРИСОВКА разблокирует глаз
+            renderScenarioList(); 
         }
     });
 
+    // Привязка событий (Delete)
     $(".delete-scenario").off("click").on("click", function() {
         deleteScenario($(this).attr("data-id"));
     });
 
+    // Привязка событий (Edit)
     $(".edit-scenario").off("click").on("click", function() {
         editScenario($(this).attr("data-id"));
     });
     
+    // Привязка событий (Toggle/Eye)
     $(".toggle-scenario").off("click").on("click", function() {
-        // Проверка блокировки
         if ($(this).attr("data-disabled") === "true") {
             toastr.info("Please use the Arrow button to add this scenario first");
             return;
@@ -236,13 +238,11 @@ function renderScenarioList() {
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             scenario.hidden = !scenario.hidden;
-            
             if (scenario.hidden) {
                 removeFromDefaultScenario(scenario.text);
             } else {
                 insertIntoDefaultScenario(scenario.text);
             }
-
             saveSettingsDebounced();
             renderScenarioList();
         }
