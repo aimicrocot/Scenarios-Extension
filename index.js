@@ -173,10 +173,22 @@ function editScenario(scenarioId) {
 
 function renderScenarioList() {
     const $listContainer = $("#scenario-list");
-    const scenarios = extension_settings[extensionName].scenarios || [];
+    const context = getContext();
+    const currentCharacter = context.characters[context.characterId]?.name;
+
+    // Если персонаж не выбран, выводим предупреждение
+    if (!currentCharacter) {
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Select a character to manage scenarios...</p>');
+        return;
+    }
+
+    const allScenarios = extension_settings[extensionName].scenarios || [];
+    
+    // ИСПРАВЛЕНИЕ: Фильтруем список, оставляя только сценарии текущего персонажа
+    const scenarios = allScenarios.filter(s => s.character === currentCharacter);
 
     if (scenarios.length === 0) {
-        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Scenario list is empty...</p>');
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">No scenarios for this character...</p>');
         return;
     }
 
@@ -186,12 +198,10 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
 
-        // Формируем превью
         const words = scenario.text.split(/\s+/).filter(w => w.length > 0);
         let slice = words.slice(0, 5);
         
         if (slice.length > 0) {
-            // Удаляем знаки препинания в конце последнего слова
             slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
         }
         
@@ -215,7 +225,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий (без изменений)
+    // Слушатели событий остаются прежними, так как они работают через data-id
     $(".toggle-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         toggleScenario(id);
@@ -223,7 +233,7 @@ function renderScenarioList() {
 
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
-        const scenario = scenarios.find(s => String(s.id) === String(id));
+        const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             insertIntoDefaultScenario(scenario.text);
         }
@@ -241,11 +251,12 @@ function renderScenarioList() {
 }
 
 function showScenarioMenu() {
+    // ... (весь HTML код popupHtml остается без изменений) ...
     const popupHtml = `
 <div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
     <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <i class="fa-solid fa-puzzle-piece"></i>
-        <span>Scenario Management</span>
+        <span>Scenario management</span>
     </h3>
 
     <div id="scenario-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid var(--smart-line-color);">
@@ -266,19 +277,26 @@ function showScenarioMenu() {
         <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0 symb.</span>
         <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
-            <span>Add</span>
+            <span>Add Scenario</span>
         </button>
     </div>
 </div>
     `;
 
     callPopup(popupHtml, "text");
-    console.log("Scenario Setup: The window is open");
-
+    
     loadSettings();
     renderScenarioList();
 
     $("#add_scenario_btn").off("click").on("click", () => {
+        const context = getContext();
+        const currentCharacter = context.characters[context.characterId]?.name;
+
+        if (!currentCharacter) {
+            toastr.warning("Please select a character first");
+            return;
+        }
+
         const $textarea = $("#new_scenario_text");
         const text = $textarea.val().trim();
         if (!text) {
@@ -290,7 +308,8 @@ function showScenarioMenu() {
             id: String(Date.now()),
             text: text,
             created: Date.now(),
-            hidden: false
+            hidden: false,
+            character: currentCharacter // ИСПРАВЛЕНИЕ: Сохраняем привязку к персонажу
         };
 
         extension_settings[extensionName].scenarios.push(newScenario);
