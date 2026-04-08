@@ -133,15 +133,21 @@ function deleteScenario(scenarioId) {
 function editScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
+    
     if (!scenario) {
         toastr.warning("Scenario not found");
         return;
     }
 
     const editHtml = `
-    <div id="edit-scenario-popup" style="max-width: 90vw; width: 100%; margin: 0 auto;">
+    <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
         <h3 style="margin-top: 0; padding-top: 15px; text-align: center;">Editing a Scenario</h3>
-        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
+        
+        <label for="edit-scenario-title" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block;">Scenario Name:</label>
+        <input id="edit-scenario-title" type="text" class="text_pole" placeholder="Scenario name" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 15px; box-sizing: border-box;" />
+
+        <label for="edit-scenario-text" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block;">Scenario Context:</label>
+        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 10px; box-sizing: border-box;"></textarea>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <button id="edit-back-btn" class="menu_button">Back</button>
@@ -152,27 +158,38 @@ function editScenario(scenarioId) {
 
     callPopup(editHtml, "text", undefined, { okButton: "Close" });
 
-    $("#edit-scenario-text").val(scenario.text);
+    // Заполняем поля текущими данными из объекта сценария
+    $("#edit-scenario-title").val(scenario.title || "");
+    $("#edit-scenario-text").val(scenario.text || "");
 
-    // Возврат в главное меню без сохранения
+    // Кнопка Back (возврат без сохранения)
     $("#edit-back-btn").off("click").on("click", () => {
         showScenarioMenu(); 
     });
 
-    // Сохранение и возврат в главное меню
+    // Кнопка Save (сохранение названия и текста)
     $("#edit-save-btn").off("click").on("click", () => {
+        const newTitle = $("#edit-scenario-title").val().trim();
         const newText = $("#edit-scenario-text").val().trim();
+        
+        if (!newTitle) {
+            toastr.warning("Name cannot be empty");
+            return;
+        }
         if (!newText) {
             toastr.warning("Text cannot be empty");
             return;
         }
 
+        // Обновляем данные в объекте
+        scenario.title = newTitle;
         scenario.text = newText;
         scenario.updated = Date.now();
 
         saveSettingsDebounced();
         toastr.success("The Scenario has been updated");
         
+        // Возвращаемся к списку
         showScenarioMenu(); 
     });
 }
