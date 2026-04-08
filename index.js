@@ -354,27 +354,14 @@ function showScenarioMenu() {
             return;
         }
 
-        const $textarea = $("#new_scenario_text");
-        const text = $textarea.val().trim();
+        const text = $("#new_scenario_text").val().trim();
         if (!text) {
             toastr.warning("Enter script text");
             return;
         }
 
-        const newScenario = {
-            id: String(Date.now()),
-            text: text,
-            created: Date.now(),
-            hidden: false,
-            character: currentCharacter // ИСПРАВЛЕНИЕ: Сохраняем привязку к персонажу
-        };
-
-        extension_settings[extensionName].scenarios.push(newScenario);
-        saveSettingsDebounced();
-        renderScenarioList();
-        $textarea.val("");
-        updateTokenCounter();
-        toastr.success("Scenario added");
+        // ВМЕСТО сохранения вызываем окно ввода названия
+        openAddTitlePopup(text);
     });
 
     $("#new_scenario_text").off("input").on("input", updateTokenCounter);
