@@ -277,7 +277,7 @@ function showScenarioMenu() {
         <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0 symb.</span>
         <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
-            <span>Add Scenario</span>
+            <span>Add</span>
         </button>
     </div>
 </div>
