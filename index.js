@@ -32,8 +32,7 @@ function escapeHtml(str) {
 }
 
 function insertIntoDefaultScenario(text) {
-    // Используем оба возможных ID для надежности
-    const $defaultScenario = $("#scenario_pole, #scenario_field");
+    const $defaultScenario = $("#scenario_pole");
 
     if ($defaultScenario.length === 0) {
         toastr.warning("Could not find the Scenario field SillyTavern");
@@ -41,23 +40,17 @@ function insertIntoDefaultScenario(text) {
     }
 
     const currentText = $defaultScenario.val() || "";
-    const trimmedNewText = text.trim();
 
-    // Раньше было currentText.includes(text) - это была ошибка.
-    // Теперь мы разбиваем текст на блоки по переносу строки и проверяем точное совпадение.
-    const existingBlocks = currentText.split(/\n/).map(block => block.trim());
-
-    if (existingBlocks.includes(trimmedNewText)) {
+    // Проверяем, есть ли уже точно такой же текст в поле
+    if (currentText.includes(text)) {
         toastr.warning("This text has already been added to Scenario");
         return false;
     }
 
-    // Формируем новый текст: если поле не пустое, добавляем 2 переноса строки для красоты
-    const newText = currentText.trim() ? currentText.trim() + "\n\n" + trimmedNewText : trimmedNewText;
-    
+    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
+    const newText = currentText.trim() ? currentText + "\n\n" + text : text;
     $defaultScenario.val(newText);
 
-    // Уведомляем систему об изменениях
     $defaultScenario.trigger("input");
     $defaultScenario.trigger("change");
 
@@ -65,25 +58,41 @@ function insertIntoDefaultScenario(text) {
     return true;
 }
 
+// Добавлена недостающая функция удаления текста из основного поля
 function removeFromDefaultScenario(text) {
-    const $scenarioField = $("#scenario_pole, #scenario_field");
+    const $scenarioField = $("#scenario_field, [name='scenario_field']");
     if ($scenarioField.length === 0) return;
 
     let currentText = $scenarioField.val();
     const targetText = text.trim();
 
-    // Экранируем спецсимволы для регулярного выражения
+    // Удаляем конкретный кусок текста и лишние переносы строк
     const escapedText = targetText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp('(\\n|^)' + escapedText + '(\\n|$)', 'g');
     
-    // Ищем текст как отдельный блок (между переносами строк или началом/концом файла)
-    const regex = new RegExp('(\\n\\n|^)' + escapedText + '(\\n\\n|$)', 'g');
+    currentText = currentText.replace(regex, '$1').trim();
     
-    let newText = currentText.replace(regex, '\n\n').trim();
-    
-    // Подчищаем лишние переносы, если они остались
-    newText = newText.replace(/\n{3,}/g, '\n\n');
+    $scenarioField.val(currentText).trigger("input").trigger("change");
+}
 
-    $scenarioField.val(newText).trigger("input").trigger("change");
+function deleteScenario(scenarioId) {
+    const scenarios = extension_settings[extensionName].scenarios || [];
+    const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
+    
+    if (index !== -1) {
+        const scenario = scenarios[index];
+
+        if (!scenario.hidden) {
+            removeFromDefaultScenario(scenario.text);
+        }
+
+        scenarios.splice(index, 1);
+        saveSettingsDebounced();
+        renderScenarioList();
+        toastr.info("The Scenario has been removed");
+    } else {
+        toastr.warning("Unable to find Scenario");
+    }
 }
 
 function editScenario(scenarioId) {
