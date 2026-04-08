@@ -180,18 +180,16 @@ function renderScenarioList() {
         return;
     }
 
-    let html = '<ul style="margin: 0; padding-left: 1.2em;">';
+    let html = '<ul style="margin: 0; padding: 0; list-style: none;">'; // Убрал дефолтные отступы списка
     scenarios.forEach(scenario => {
         const isHidden = scenario.hidden || false;
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
 
-        // Формируем превью
         const words = scenario.text.split(/\s+/).filter(w => w.length > 0);
         let slice = words.slice(0, 5);
         
         if (slice.length > 0) {
-            // Удаляем знаки препинания в конце последнего слова
             slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
         }
         
@@ -199,15 +197,15 @@ function renderScenarioList() {
         const safePreview = escapeHtml(previewText);
 
         html += `
-            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
-                <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <li class="scenario-item" style="opacity: ${opacity};">
+                <div class="scenario-preview-container">
                     <strong>${safePreview}</strong>
                 </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Show' : 'Hide'}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                <div class="scenario-controls">
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Show' : 'Hide'}"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario"></i>
+                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}"></i>
+                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}"></i>
                 </div>
             </li>
         `;
@@ -215,7 +213,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий (без изменений)
+    // Слушатели событий остаются без изменений...
     $(".toggle-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         toggleScenario(id);
