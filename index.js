@@ -32,7 +32,8 @@ function escapeHtml(str) {
 }
 
 function insertIntoDefaultScenario(text) {
-    const $defaultScenario = $("#scenario_pole");
+    // Используем оба возможных ID для надежности
+    const $defaultScenario = $("#scenario_pole, #scenario_field");
 
     if ($defaultScenario.length === 0) {
         toastr.warning("Could not find the Scenario field SillyTavern");
@@ -40,17 +41,23 @@ function insertIntoDefaultScenario(text) {
     }
 
     const currentText = $defaultScenario.val() || "";
+    const trimmedNewText = text.trim();
 
-    // Проверяем, есть ли уже точно такой же текст в поле
-    if (currentText.includes(text)) {
+    // Раньше было currentText.includes(text) - это была ошибка.
+    // Теперь мы разбиваем текст на блоки по переносу строки и проверяем точное совпадение.
+    const existingBlocks = currentText.split(/\n/).map(block => block.trim());
+
+    if (existingBlocks.includes(trimmedNewText)) {
         toastr.warning("This text has already been added to Scenario");
         return false;
     }
 
-    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
-    const newText = currentText.trim() ? currentText + "\n\n" + text : text;
+    // Формируем новый текст: если поле не пустое, добавляем 2 переноса строки для красоты
+    const newText = currentText.trim() ? currentText.trim() + "\n\n" + trimmedNewText : trimmedNewText;
+    
     $defaultScenario.val(newText);
 
+    // Уведомляем систему об изменениях
     $defaultScenario.trigger("input");
     $defaultScenario.trigger("change");
 
