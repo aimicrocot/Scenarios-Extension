@@ -179,7 +179,6 @@ function editScenario(scenarioId) {
     });
 }
 
-
         // ИСПРАВЛЕНИЕ: Теперь мы просто обновляем текст в настройках расширения.
         // Функции removeFromDefaultScenario и insertIntoDefaultScenario здесь больше не вызываются.
         scenario.text = newText;
