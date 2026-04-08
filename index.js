@@ -60,10 +60,11 @@ function insertIntoDefaultScenario(text) {
 
 // Добавлена недостающая функция удаления текста из основного поля
 function removeFromDefaultScenario(text) {
-    const $scenarioField = $("#scenario_field, [name='scenario_field']");
+    // Исправлен селектор: теперь он идентичен тому, что используется в insertIntoDefaultScenario
+    const $scenarioField = $("#scenario_pole, #scenario_field");
     if ($scenarioField.length === 0) return;
 
-    let currentText = $scenarioField.val();
+    let currentText = $scenarioField.val() || "";
     const targetText = text.trim();
 
     // Удаляем конкретный кусок текста и лишние переносы строк
@@ -196,7 +197,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий (остается прежней)
+    // Привязка событий
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
@@ -219,6 +220,14 @@ function renderScenarioList() {
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             scenario.hidden = !scenario.hidden;
+            
+            // ДОБАВЛЕНО: Теперь при скрытии/раскрытии текст физически удаляется или добавляется
+            if (scenario.hidden) {
+                removeFromDefaultScenario(scenario.text);
+            } else {
+                insertIntoDefaultScenario(scenario.text);
+            }
+
             saveSettingsDebounced();
             renderScenarioList();
         }
