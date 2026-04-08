@@ -150,7 +150,7 @@ function editScenario(scenarioId) {
     </div>
     `;
 
-    callPopup(editHtml, "text");
+    callPopup(editHtml, "text", undefined, { okButton: "Close" });
 
     $("#edit-scenario-text").val(scenario.text);
 
@@ -289,7 +289,7 @@ function showScenarioMenu() {
 </div>
     `;
 
-    callPopup(popupHtml, "text");
+    callPopup(popupHtml, "text", undefined, { okButton: "Close" });
     
     loadSettings();
     renderScenarioList();
