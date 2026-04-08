@@ -65,41 +65,25 @@ function insertIntoDefaultScenario(text) {
     return true;
 }
 
-// Добавлена недостающая функция удаления текста из основного поля
 function removeFromDefaultScenario(text) {
-    const $scenarioField = $("#scenario_field, [name='scenario_field']");
+    const $scenarioField = $("#scenario_pole, #scenario_field");
     if ($scenarioField.length === 0) return;
 
     let currentText = $scenarioField.val();
     const targetText = text.trim();
 
-    // Удаляем конкретный кусок текста и лишние переносы строк
+    // Экранируем спецсимволы для регулярного выражения
     const escapedText = targetText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp('(\\n|^)' + escapedText + '(\\n|$)', 'g');
     
-    currentText = currentText.replace(regex, '$1').trim();
+    // Ищем текст как отдельный блок (между переносами строк или началом/концом файла)
+    const regex = new RegExp('(\\n\\n|^)' + escapedText + '(\\n\\n|$)', 'g');
     
-    $scenarioField.val(currentText).trigger("input").trigger("change");
-}
-
-function deleteScenario(scenarioId) {
-    const scenarios = extension_settings[extensionName].scenarios || [];
-    const index = scenarios.findIndex(s => String(s.id) === String(scenarioId));
+    let newText = currentText.replace(regex, '\n\n').trim();
     
-    if (index !== -1) {
-        const scenario = scenarios[index];
+    // Подчищаем лишние переносы, если они остались
+    newText = newText.replace(/\n{3,}/g, '\n\n');
 
-        if (!scenario.hidden) {
-            removeFromDefaultScenario(scenario.text);
-        }
-
-        scenarios.splice(index, 1);
-        saveSettingsDebounced();
-        renderScenarioList();
-        toastr.info("The Scenario has been removed");
-    } else {
-        toastr.warning("Unable to find Scenario");
-    }
+    $scenarioField.val(newText).trigger("input").trigger("change");
 }
 
 function editScenario(scenarioId) {
