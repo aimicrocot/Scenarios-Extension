@@ -159,16 +159,11 @@ function editScenario(scenarioId) {
             return;
         }
 
-        // Если сценарий активен, обновляем текст в дефолтном поле
-        if (!scenario.hidden) {
-            removeFromDefaultScenario(scenario.text);
-            scenario.text = newText;
-            insertIntoDefaultScenario(scenario.text);
-        } else {
-            scenario.text = newText;
-        }
-
+        // ИСПРАВЛЕНИЕ: Теперь мы просто обновляем текст в настройках расширения.
+        // Функции removeFromDefaultScenario и insertIntoDefaultScenario здесь больше не вызываются.
+        scenario.text = newText;
         scenario.updated = Date.now();
+
         saveSettingsDebounced();
         renderScenarioList();
         toastr.success("The Scenario has been updated");
