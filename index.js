@@ -187,9 +187,16 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
 
-        // Создаем превью: берем первые 5 слов и добавляем многоточие
-        const words = scenario.text.split(/\s+/);
-        const previewText = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '...');
+        // Формируем превью
+        const words = scenario.text.split(/\s+/).filter(w => w.length > 0);
+        let slice = words.slice(0, 5);
+        
+        if (slice.length > 0) {
+            // Удаляем знаки препинания в конце последнего слова перед добавлением многоточия
+            slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
+        }
+        
+        const previewText = slice.join(' ') + '...';
         const safePreview = escapeHtml(previewText);
 
         html += `
@@ -210,7 +217,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий (остается без изменений)
+    // Привязка событий остается без изменений
     $(".toggle-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         toggleScenario(id);
