@@ -149,9 +149,9 @@ function editScenario(scenarioId) {
         <label for="edit-scenario-text" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block;">Scenario Context:</label>
         <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 10px; box-sizing: border-box; resize: vertical;"></textarea>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 10px;">
-            <button id="edit-back-btn" class="menu_button" style="flex: 1;">Back</button>
-            <button id="edit-save-btn" class="menu_button" style="flex: 1;">Save</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <button id="edit-back-btn" class="menu_button">Back</button>
+            <button id="edit-save-btn" class="menu_button">Save</button>
         </div>
     </div>
     `;
@@ -268,9 +268,9 @@ function openAddTitlePopup(scenarioText) {
         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 10px; text-align: center;">Give a name to your scenario:</p>
         <input id="new-scenario-title" type="text" class="text_pole" placeholder="e.g., Adventure Start" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 20px; box-sizing: border-box; height: 35px;" />
         
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-            <button id="title-back-btn" class="menu_button" style="flex: 1;">Back</button>
-            <button id="title-save-btn" class="menu_button" style="flex: 1;">Save</button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button id="title-back-btn" class="menu_button">Back</button>
+            <button id="title-save-btn" class="menu_button">Save</button>
         </div>
     </div>
     `;
