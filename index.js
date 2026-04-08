@@ -163,7 +163,7 @@ function renderScenarioList() {
         return;
     }
 
-    // Получаем текущий текст из поля сценария для проверки
+    // ВАЖНО: Получаем актуальный текст из поля прямо сейчас
     const currentDefaultText = ($("#scenario_pole, #scenario_field").val() || "").trim();
     const existingBlocks = currentDefaultText.split(/\n/).map(block => block.trim());
 
@@ -173,14 +173,15 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
         
-        // ПРОВЕРКА: добавлен ли уже этот конкретный текст
+        // Проверка: есть ли этот текст в поле Scenario прямо сейчас
         const isAlreadyAdded = existingBlocks.includes(scenario.text.trim());
         const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
 
-        // НОВАЯ ЛОГИКА: Глаз недоступен, если текст еще не добавлен и при этом не скрыт
+        // ЛОГИКА БЛОКИРОВКИ: Глаз недоступен, если текста нет в поле И он не в состоянии "скрыт"
+        // (Если он скрыт, значит мы его уже добавляли ранее, и на глаз нажать можно, чтобы вернуть текст)
         const isEyeDisabled = !isAlreadyAdded && !isHidden;
         const eyeCursor = isEyeDisabled ? 'not-allowed' : 'pointer';
-        const eyeOpacity = isEyeDisabled ? '0.2' : '0.7';
+        const eyeOpacity = isEyeDisabled ? '0.15' : '0.7'; // Делаем очень тусклым, если нельзя нажать
 
         let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
         const safeTitle = escapeHtml(displayTitle);
@@ -191,8 +192,12 @@ function renderScenarioList() {
                     <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" data-disabled="${isEyeDisabled}" style="cursor: ${eyeCursor}; opacity: ${eyeOpacity};" title="${isEyeDisabled ? 'Insert scenario first' : 'Toggle visibility'}"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Insert"></i>
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" 
+                       data-id="${scenario.id}" 
+                       data-disabled="${isEyeDisabled}" 
+                       style="cursor: ${eyeCursor}; opacity: ${eyeOpacity};" 
+                       title="${isEyeDisabled ? 'Insert scenario first' : 'Toggle visibility'}"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Insert into Scenario"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Edit"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Delete"></i>
                 </div>
@@ -208,7 +213,7 @@ function renderScenarioList() {
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             insertIntoDefaultScenario(scenario.text);
-            renderScenarioList(); // Перерисовываем список
+            renderScenarioList(); // ПЕРЕРИСОВКА разблокирует глаз
         }
     });
 
@@ -221,9 +226,9 @@ function renderScenarioList() {
     });
     
     $(".toggle-scenario").off("click").on("click", function() {
-        // Блокируем клик, если кнопка Глаз в статусе "недоступна"
+        // Проверка блокировки
         if ($(this).attr("data-disabled") === "true") {
-            toastr.warning("Please insert the scenario (Arrow button) before toggling visibility");
+            toastr.info("Please use the Arrow button to add this scenario first");
             return;
         }
 
