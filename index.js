@@ -256,6 +256,57 @@ function renderScenarioList() {
     });
 }
 
+function openAddTitlePopup(scenarioText) {
+    const titleHtml = `
+    <div id="add-title-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
+        <h3 style="margin-top: 0; padding-top: 15px; text-align: center;">Scenario Name</h3>
+        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 10px; text-align: center;">Give a name to your scenario:</p>
+        <input id="new-scenario-title" type="text" class="text_pole" placeholder="e.g., Adventure Start" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 20px; box-sizing: border-box;" />
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button id="title-back-btn" class="menu_button">Back</button>
+            <button id="title-save-btn" class="menu_button">Save</button>
+        </div>
+    </div>
+    `;
+
+    // Вызываем попап с кнопкой Close (как мы договаривались ранее)
+    callPopup(titleHtml, "text", undefined, { okButton: "Close" });
+
+    // Обработка кнопки Back: возвращаемся в главное меню и восстанавливаем текст в textarea
+    $("#title-back-btn").off("click").on("click", () => {
+        showScenarioMenu(); 
+        // Небольшая задержка, чтобы DOM успел прогрузиться
+        setTimeout(() => $("#new_scenario_text").val(scenarioText), 50);
+    });
+
+    // Обработка кнопки Save: создаем объект и сохраняем
+    $("#title-save-btn").off("click").on("click", () => {
+        const title = $("#new-scenario-title").val().trim();
+        if (!title) {
+            toastr.warning("Please enter a name");
+            return;
+        }
+
+        const context = getContext();
+        const currentCharacter = context.characters[context.characterId]?.name;
+
+        const newScenario = {
+            id: String(Date.now()),
+            text: scenarioText,
+            title: title, // Сохраняем наше название
+            created: Date.now(),
+            hidden: false,
+            character: currentCharacter
+        };
+
+        extension_settings[extensionName].scenarios.push(newScenario);
+        saveSettingsDebounced();
+        toastr.success("Scenario saved");
+        showScenarioMenu(); // Возвращаемся к списку
+    });
+}
+
 function showScenarioMenu() {
     // ... (весь HTML код popupHtml остается без изменений) ...
     const popupHtml = `
