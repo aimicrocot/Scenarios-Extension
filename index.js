@@ -139,14 +139,9 @@ function editScenario(scenarioId) {
     }
 
     const editHtml = `
-    <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
-        <h3 style="margin-top: 0;">Editing a Scenario</h3>
-        
-        <label style="font-size: 0.85em; opacity: 0.7;">Scenario Name:</label>
-        <input id="edit-scenario-title" type="text" class="text_pole" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 5px 0 15px 0; box-sizing: border-box;" />
-
-        <label style="font-size: 0.85em; opacity: 0.7;">Scenario Context:</label>
-        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 5px 0; box-sizing: border-box;"></textarea>
+    <div id="edit-scenario-popup" style="max-width: 90vw; width: 100%; margin: 0 auto;">
+        <h3 style="margin-top: 0; padding-top: 15px; text-align: center;">Editing a Scenario</h3>
+        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <button id="edit-back-btn" class="menu_button">Back</button>
@@ -157,38 +152,117 @@ function editScenario(scenarioId) {
 
     callPopup(editHtml, "text", undefined, { okButton: "Close" });
 
-    $("#edit-scenario-title").val(scenario.title || "");
     $("#edit-scenario-text").val(scenario.text);
 
+    // Возврат в главное меню без сохранения
     $("#edit-back-btn").off("click").on("click", () => {
         showScenarioMenu(); 
     });
 
+    // Сохранение и возврат в главное меню
     $("#edit-save-btn").off("click").on("click", () => {
-        const newTitle = $("#edit-scenario-title").val().trim();
         const newText = $("#edit-scenario-text").val().trim();
-        
-        if (!newTitle || !newText) {
-            toastr.warning("Fields cannot be empty");
+        if (!newText) {
+            toastr.warning("Text cannot be empty");
             return;
         }
 
-        scenario.title = newTitle;
         scenario.text = newText;
         scenario.updated = Date.now();
 
         saveSettingsDebounced();
-        toastr.success("Updated");
+        toastr.success("The Scenario has been updated");
+        
         showScenarioMenu(); 
     });
 }
 
+function renderScenarioList() {
+    const $listContainer = $("#scenario-list");
+    const context = getContext();
+    const currentCharacter = context.characters[context.characterId]?.name;
+
+    // Если персонаж не выбран, выводим предупреждение
+    if (!currentCharacter) {
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Select a character to manage scenarios...</p>');
+        return;
+    }
+
+    const allScenarios = extension_settings[extensionName].scenarios || [];
+    
+    // ИСПРАВЛЕНИЕ: Фильтруем список, оставляя только сценарии текущего персонажа
+    const scenarios = allScenarios.filter(s => s.character === currentCharacter);
+
+    if (scenarios.length === 0) {
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">No scenarios for this character...</p>');
+        return;
+    }
+
+    let html = '<ul style="margin: 0; padding-left: 1.2em;">';
+    scenarios.forEach(scenario => {
+        const isHidden = scenario.hidden || false;
+        const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
+        const opacity = isHidden ? '0.4' : '1';
+
+        const words = scenario.text.split(/\s+/).filter(w => w.length > 0);
+        let slice = words.slice(0, 5);
+        
+        if (slice.length > 0) {
+            slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
+        }
+        
+        const previewText = slice.join(' ') + '...';
+        const safePreview = escapeHtml(previewText);
+
+        html += `
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
+                <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <strong>${safePreview}</strong>
+                </div>
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Show' : 'Hide'}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                </div>
+            </li>
+        `;
+    });
+    html += '</ul>';
+    $listContainer.html(html);
+
+    // Слушатели событий остаются прежними, так как они работают через data-id
+    $(".toggle-scenario").off("click").on("click", function() {
+        const id = $(this).data("id");
+        toggleScenario(id);
+    });
+
+    $(".insert-scenario").off("click").on("click", function() {
+        const id = $(this).data("id");
+        const scenario = allScenarios.find(s => String(s.id) === String(id));
+        if (scenario) {
+            insertIntoDefaultScenario(scenario.text);
+        }
+    });
+
+    $(".delete-scenario").off("click").on("click", function() {
+        const id = $(this).data("id");
+        deleteScenario(id);
+    });
+
+    $(".edit-scenario").off("click").on("click", function() {
+        const id = $(this).data("id");
+        editScenario(id);
+    });
+}
+
 function showScenarioMenu() {
+    // ... (весь HTML код popupHtml остается без изменений) ...
     const popupHtml = `
 <div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
     <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <i class="fa-solid fa-puzzle-piece"></i>
-        <span>Scenario Management</span>
+        <span>Scenario management</span>
     </h3>
 
     <div id="scenario-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid var(--smart-line-color);">
@@ -196,14 +270,20 @@ function showScenarioMenu() {
     </div>
 
     <div class="scenario-edit-area">
-        <textarea id="new_scenario_text" placeholder="(The context of this dialogue)" class="text_pole" rows="5" style="width: 100%; background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;"></textarea>
+        <textarea
+            id="new_scenario_text"
+            placeholder="(The context of this dialogue)"
+            class="text_pole"
+            rows="5"
+            style="width: 100%; background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;"
+        ></textarea>
     </div>
 
     <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
         <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0 symb.</span>
         <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
-            <span>Add Scenario</span>
+            <span>Add</span>
         </button>
     </div>
 </div>
@@ -211,6 +291,7 @@ function showScenarioMenu() {
 
     callPopup(popupHtml, "text", undefined, { okButton: "Close" });
     
+    loadSettings();
     renderScenarioList();
 
     $("#add_scenario_btn").off("click").on("click", () => {
@@ -222,64 +303,55 @@ function showScenarioMenu() {
             return;
         }
 
-        const text = $("#new_scenario_text").val().trim();
+        const $textarea = $("#new_scenario_text");
+        const text = $textarea.val().trim();
         if (!text) {
             toastr.warning("Enter script text");
             return;
         }
 
-        openAddTitlePopup(text);
+        const newScenario = {
+            id: String(Date.now()),
+            text: text,
+            created: Date.now(),
+            hidden: false,
+            character: currentCharacter // ИСПРАВЛЕНИЕ: Сохраняем привязку к персонажу
+        };
+
+        extension_settings[extensionName].scenarios.push(newScenario);
+        saveSettingsDebounced();
+        renderScenarioList();
+        $textarea.val("");
+        updateTokenCounter();
+        toastr.success("Scenario added");
     });
 
     $("#new_scenario_text").off("input").on("input", updateTokenCounter);
     updateTokenCounter();
 }
 
-function openAddTitlePopup(scenarioText) {
-    const titleHtml = `
-    <div id="add-title-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
-        <h3 style="margin-top: 0;">Scenario Name</h3>
-        <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 10px;">Give a name to your scenario:</p>
-        <input id="new-scenario-title" type="text" class="text_pole" placeholder="e.g., Adventure Start" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 20px; box-sizing: border-box;" />
-        
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <button id="title-back-btn" class="menu_button">Back</button>
-            <button id="title-save-btn" class="menu_button">Save</button>
-        </div>
-    </div>
-    `;
+function injectPuzzleButton() {
+    if ($("#scenario-setup-button").length > 0) return;
 
-    callPopup(titleHtml, "text", undefined, { okButton: "Close" });
-
-    $("#title-back-btn").off("click").on("click", () => {
-        showScenarioMenu(); 
-        $("#new_scenario_text").val(scenarioText); 
-    });
-
-    $("#title-save-btn").off("click").on("click", () => {
-        const title = $("#new-scenario-title").val().trim();
-        if (!title) {
-            toastr.warning("Please enter a name");
-            return;
-        }
-
-        const context = getContext();
-        const currentCharacter = context.characters[context.characterId]?.name;
-
-        const newScenario = {
-            id: String(Date.now()),
-            text: scenarioText,
-            title: title,
-            created: Date.now(),
-            hidden: false,
-            character: currentCharacter
-        };
-
-        extension_settings[extensionName].scenarios.push(newScenario);
-        saveSettingsDebounced();
-        toastr.success("Scenario saved");
-        showScenarioMenu(); 
-    });
+    const targetButton = $("#advanced_div");
+    if (targetButton.length > 0) {
+        const buttonContainer = targetButton.parent();
+        const puzzleButton = $(`
+            <div id="scenario-setup-button"
+                 class="menu_button fa-solid fa-puzzle-piece interactable"
+                 title="Scenario Setup"
+                 tabindex="0"
+                 role="button"
+                 style="display: flex; align-items: center; justify-content: center;">
+            </div>
+        `);
+        buttonContainer.prepend(puzzleButton);
+        puzzleButton.on("click", (e) => {
+            e.stopPropagation();
+            showScenarioMenu();
+        });
+        console.log("Scenario Setup: Button added");
+    }
 }
 
 jQuery(async () => {
