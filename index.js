@@ -140,18 +140,18 @@ function editScenario(scenarioId) {
     }
 
     const editHtml = `
-    <div id="edit-scenario-popup" style="width: 100%; min-width: 400px; max-width: 90vw; margin: 0 auto; box-sizing: border-box;">
-        <h3 style="margin-top: 0; padding-top: 15px; text-align: center;">Editing a Scenario</h3>
+    <div id="edit-scenario-popup" style="width: 100%; max-width: 500px; margin: 0 auto; box-sizing: border-box; padding: 10px;">
+        <h3 style="margin-top: 0; padding-top: 5px; text-align: center;">Editing a Scenario</h3>
         
-        <label for="edit-scenario-title" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block; text-align: center;">Scenario Name:</label>
-        <input id="edit-scenario-title" type="text" class="text_pole" placeholder="Scenario name" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 15px; box-sizing: border-box;" />
+        <label for="edit-scenario-title" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block;">Scenario Name:</label>
+        <input id="edit-scenario-title" type="text" class="text_pole" placeholder="Scenario name" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 15px; box-sizing: border-box; height: 35px;" />
 
-        <label for="edit-scenario-text" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block; text-align: center;">Scenario Context:</label>
-        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 10px; box-sizing: border-box;"></textarea>
+        <label for="edit-scenario-text" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block;">Scenario Context:</label>
+        <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 10px; box-sizing: border-box; resize: vertical;"></textarea>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-            <button id="edit-back-btn" class="menu_button">Back</button>
-            <button id="edit-save-btn" class="menu_button">Save</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 10px;">
+            <button id="edit-back-btn" class="menu_button" style="flex: 1;">Back</button>
+            <button id="edit-save-btn" class="menu_button" style="flex: 1;">Save</button>
         </div>
     </div>
     `;
@@ -161,30 +161,20 @@ function editScenario(scenarioId) {
     $("#edit-scenario-title").val(scenario.title || "");
     $("#edit-scenario-text").val(scenario.text || "");
 
-    $("#edit-back-btn").off("click").on("click", () => {
-        showScenarioMenu(); 
-    });
-
+    $("#edit-back-btn").off("click").on("click", () => { showScenarioMenu(); });
     $("#edit-save-btn").off("click").on("click", () => {
         const newTitle = $("#edit-scenario-title").val().trim();
         const newText = $("#edit-scenario-text").val().trim();
         
-        if (!newTitle) {
-            toastr.warning("Name cannot be empty");
-            return;
-        }
-        if (!newText) {
-            toastr.warning("Text cannot be empty");
-            return;
-        }
+        if (!newTitle) { toastr.warning("Name cannot be empty"); return; }
+        if (!newText) { toastr.warning("Text cannot be empty"); return; }
 
         scenario.title = newTitle;
         scenario.text = newText;
         scenario.updated = Date.now();
 
         saveSettingsDebounced();
-        toastr.success("The Scenario has been updated");
-        
+        toastr.success("Updated");
         showScenarioMenu(); 
     });
 }
@@ -273,14 +263,14 @@ function renderScenarioList() {
 
 function openAddTitlePopup(scenarioText) {
     const titleHtml = `
-    <div id="add-title-popup" style="width: 100%; min-width: 400px; max-width: 90vw; margin: 0 auto; box-sizing: border-box;">
-        <h3 style="margin-top: 0; padding-top: 15px; text-align: center;">Scenario Name</h3>
+    <div id="add-title-popup" style="width: 100%; max-width: 400px; margin: 0 auto; box-sizing: border-box; padding: 10px;">
+        <h3 style="margin-top: 0; padding-top: 5px; text-align: center;">Scenario Name</h3>
         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 10px; text-align: center;">Give a name to your scenario:</p>
-        <input id="new-scenario-title" type="text" class="text_pole" placeholder="e.g., Adventure Start" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 20px; box-sizing: border-box;" />
+        <input id="new-scenario-title" type="text" class="text_pole" placeholder="e.g., Adventure Start" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 20px; box-sizing: border-box; height: 35px;" />
         
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <button id="title-back-btn" class="menu_button">Back</button>
-            <button id="title-save-btn" class="menu_button">Save</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+            <button id="title-back-btn" class="menu_button" style="flex: 1;">Back</button>
+            <button id="title-save-btn" class="menu_button" style="flex: 1;">Save</button>
         </div>
     </div>
     `;
@@ -294,10 +284,7 @@ function openAddTitlePopup(scenarioText) {
 
     $("#title-save-btn").off("click").on("click", () => {
         const title = $("#new-scenario-title").val().trim();
-        if (!title) {
-            toastr.warning("Please enter a name");
-            return;
-        }
+        if (!title) { toastr.warning("Please enter a name"); return; }
 
         const context = getContext();
         const currentCharacter = context.characters[context.characterId]?.name;
@@ -313,7 +300,7 @@ function openAddTitlePopup(scenarioText) {
 
         extension_settings[extensionName].scenarios.push(newScenario);
         saveSettingsDebounced();
-        toastr.success("Scenario saved");
+        toastr.success("Saved");
         showScenarioMenu(); 
     });
 }
