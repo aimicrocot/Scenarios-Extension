@@ -182,7 +182,6 @@ function renderScenarioList() {
 
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
-        const safeText = escapeHtml(scenario.text);
         const isHidden = scenario.hidden || false;
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
@@ -192,7 +191,7 @@ function renderScenarioList() {
         let slice = words.slice(0, 5);
         
         if (slice.length > 0) {
-            // Удаляем знаки препинания в конце последнего слова перед добавлением многоточия
+            // Удаляем знаки препинания в конце последнего слова
             slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
         }
         
@@ -200,12 +199,11 @@ function renderScenarioList() {
         const safePreview = escapeHtml(previewText);
 
         html += `
-            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; opacity: ${opacity}; gap: 8px;">
-                <div style="flex: 1; text-align: left;">
-                    <strong>${safePreview}</strong><br>
-                    ${safeText}
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
+                <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <strong>${safePreview}</strong>
                 </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0; max-width: 120px;">
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Show' : 'Hide'}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
@@ -217,7 +215,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий остается без изменений
+    // Привязка событий (без изменений)
     $(".toggle-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         toggleScenario(id);
