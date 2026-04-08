@@ -260,7 +260,7 @@ function showScenarioMenu() {
     // ... (весь HTML код popupHtml остается без изменений) ...
     const popupHtml = `
 <div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
-    <h3 style="display: flex; align-items: center; text-align: center; gap: 10px; margin-bottom: 20px;">
+    <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <i class="fa-solid fa-puzzle-piece"></i>
         <span>Scenario Management</span>
     </h3>
