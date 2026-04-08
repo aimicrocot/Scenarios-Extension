@@ -140,13 +140,13 @@ function editScenario(scenarioId) {
     }
 
     const editHtml = `
-    <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
+    <div id="edit-scenario-popup" style="width: 100%; min-width: 400px; max-width: 90vw; margin: 0 auto; box-sizing: border-box;">
         <h3 style="margin-top: 0; padding-top: 15px; text-align: center;">Editing a Scenario</h3>
         
-        <label for="edit-scenario-title" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block;">Scenario Name:</label>
+        <label for="edit-scenario-title" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block; text-align: center;">Scenario Name:</label>
         <input id="edit-scenario-title" type="text" class="text_pole" placeholder="Scenario name" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 15px; box-sizing: border-box;" />
 
-        <label for="edit-scenario-text" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block;">Scenario Context:</label>
+        <label for="edit-scenario-text" style="font-size: 0.85em; opacity: 0.7; margin-bottom: 5px; display: block; text-align: center;">Scenario Context:</label>
         <textarea id="edit-scenario-text" class="text_pole" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 10px; box-sizing: border-box;"></textarea>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
@@ -158,16 +158,13 @@ function editScenario(scenarioId) {
 
     callPopup(editHtml, "text", undefined, { okButton: "Close" });
 
-    // Заполняем поля текущими данными из объекта сценария
     $("#edit-scenario-title").val(scenario.title || "");
     $("#edit-scenario-text").val(scenario.text || "");
 
-    // Кнопка Back (возврат без сохранения)
     $("#edit-back-btn").off("click").on("click", () => {
         showScenarioMenu(); 
     });
 
-    // Кнопка Save (сохранение названия и текста)
     $("#edit-save-btn").off("click").on("click", () => {
         const newTitle = $("#edit-scenario-title").val().trim();
         const newText = $("#edit-scenario-text").val().trim();
@@ -181,7 +178,6 @@ function editScenario(scenarioId) {
             return;
         }
 
-        // Обновляем данные в объекте
         scenario.title = newTitle;
         scenario.text = newText;
         scenario.updated = Date.now();
@@ -189,7 +185,6 @@ function editScenario(scenarioId) {
         saveSettingsDebounced();
         toastr.success("The Scenario has been updated");
         
-        // Возвращаемся к списку
         showScenarioMenu(); 
     });
 }
@@ -278,7 +273,7 @@ function renderScenarioList() {
 
 function openAddTitlePopup(scenarioText) {
     const titleHtml = `
-    <div id="add-title-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
+    <div id="add-title-popup" style="width: 100%; min-width: 400px; max-width: 90vw; margin: 0 auto; box-sizing: border-box;">
         <h3 style="margin-top: 0; padding-top: 15px; text-align: center;">Scenario Name</h3>
         <p style="font-size: 0.85em; opacity: 0.7; margin-bottom: 10px; text-align: center;">Give a name to your scenario:</p>
         <input id="new-scenario-title" type="text" class="text_pole" placeholder="e.g., Adventure Start" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin-bottom: 20px; box-sizing: border-box;" />
@@ -290,17 +285,13 @@ function openAddTitlePopup(scenarioText) {
     </div>
     `;
 
-    // Вызываем попап с кнопкой Close (как мы договаривались ранее)
     callPopup(titleHtml, "text", undefined, { okButton: "Close" });
 
-    // Обработка кнопки Back: возвращаемся в главное меню и восстанавливаем текст в textarea
     $("#title-back-btn").off("click").on("click", () => {
         showScenarioMenu(); 
-        // Небольшая задержка, чтобы DOM успел прогрузиться
         setTimeout(() => $("#new_scenario_text").val(scenarioText), 50);
     });
 
-    // Обработка кнопки Save: создаем объект и сохраняем
     $("#title-save-btn").off("click").on("click", () => {
         const title = $("#new-scenario-title").val().trim();
         if (!title) {
@@ -314,7 +305,7 @@ function openAddTitlePopup(scenarioText) {
         const newScenario = {
             id: String(Date.now()),
             text: scenarioText,
-            title: title, // Сохраняем наше название
+            title: title, 
             created: Date.now(),
             hidden: false,
             character: currentCharacter
@@ -323,7 +314,7 @@ function openAddTitlePopup(scenarioText) {
         extension_settings[extensionName].scenarios.push(newScenario);
         saveSettingsDebounced();
         toastr.success("Scenario saved");
-        showScenarioMenu(); // Возвращаемся к списку
+        showScenarioMenu(); 
     });
 }
 
