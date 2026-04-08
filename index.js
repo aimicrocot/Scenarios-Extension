@@ -32,32 +32,30 @@ function escapeHtml(str) {
 }
 
 function insertIntoDefaultScenario(text) {
-    // Пробуем найти поле по ID или по имени (для разных версий интерфейса)
-    const $scenarioField = $("#scenario_field, [name='scenario_field']");
-    
-    if ($scenarioField.length === 0) {
-        console.error("Extension: #scenario_field not found!");
-        toastr.error("Please open the Character Editor (pencil icon) first!");
-        return;
+    const $defaultScenario = $("#scenario_pole");
+
+    if ($defaultScenario.length === 0) {
+        toastr.warning("Could not find the Scenario field SillyTavern");
+        return false;
     }
 
-    const val = $scenarioField.val();
-    const currentText = val ? val.trim() : "";
-    const newText = text ? text.trim() : "";
+    const currentText = $defaultScenario.val() || "";
 
-    if (currentText === newText) {
-        toastr.info("This exact scenario is already set");
-        return;
+    // Проверяем, есть ли уже точно такой же текст в поле
+    if (currentText.includes(text)) {
+        toastr.warning("This text has already been added to Scenario");
+        return false;
     }
 
-    if (currentText.length > 0) {
-        $scenarioField.val(currentText + "\n" + newText);
-    } else {
-        $scenarioField.val(newText);
-    }
+    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
+    const newText = currentText.trim() ? currentText + "\n\n" + text : text;
+    $defaultScenario.val(newText);
 
-    $scenarioField.trigger("input").trigger("change");
-    toastr.success("Scenario added to main field");
+    $defaultScenario.trigger("input");
+    $defaultScenario.trigger("change");
+
+    toastr.success("Prompt added to Scenario");
+    return true;
 }
 
 // Добавлена недостающая функция удаления текста из основного поля
