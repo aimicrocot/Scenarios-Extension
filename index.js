@@ -27,60 +27,29 @@ function escapeHtml(str) {
 }
 
 function insertIntoDefaultScenario(text) {
-    const $defaultScenario = $("#scenario_pole");
+    // Находим основное поле Scenario в SillyTavern
+    const $scenarioField = $("#scenario_field"); 
+    const currentText = $scenarioField.val().trim();
+    const newText = text.trim();
 
-    if ($defaultScenario.length === 0) {
-        toastr.warning("Could not find the Scenario field SillyTavern");
-        return false;
+    // ИСПРАВЛЕНИЕ: Блокируем добавление ТОЛЬКО если всё содержимое поля 
+    // один-в-один совпадает с новым текстом.
+    if (currentText === newText) {
+        toastr.info("This exact scenario is already set");
+        return;
     }
 
-    const currentText = $defaultScenario.val() || "";
-
-    // Проверяем, есть ли уже точно такой же текст в поле
-    if (currentText.includes(text)) {
-        toastr.warning("This text has already been added to Scenario");
-        return false;
+    // Если в поле уже что-то есть, просто добавляем новый текст с новой строки
+    if (currentText.length > 0) {
+        $scenarioField.val(currentText + "\n" + newText);
+    } else {
+        $scenarioField.val(newText);
     }
 
-    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
-    const newText = currentText.trim() ? currentText + "\n\n" + text : text;
-    $defaultScenario.val(newText);
-
-    $defaultScenario.trigger("input");
-    $defaultScenario.trigger("change");
-
-    toastr.success("Prompt added to Scenario");
-    return true;
-}
-
-function removeFromDefaultScenario(text) {
-    const $defaultScenario = $("#scenario_pole");
-
-    if ($defaultScenario.length === 0) {
-        return false;
-    }
-
-    const currentText = $defaultScenario.val() || "";
-
-    if (!currentText.includes(text)) {
-        return false;
-    }
-
-    let newText = currentText.replace(text, "");
-    newText = newText.replace(/\n{3,}/g, "\n\n");
-    newText = newText.trim();
-
-    $defaultScenario.val(newText);
-    $defaultScenario.trigger("input");
-    $defaultScenario.trigger("change");
-
-    return true;
-}
-
-function updateTokenCounter() {
-    const text = $("#new_scenario_text").val() || "";
-    const charCount = text.length;
-    $(".token-counter").text(`${charCount} symb.`);
+    // Обязательно вызываем события, чтобы SillyTavern "понял", что текст изменился и сохранил его
+    $scenarioField.trigger("input").trigger("change");
+    
+    toastr.success("Scenario added to main field");
 }
 
 function toggleScenario(scenarioId) {
