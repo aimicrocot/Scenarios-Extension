@@ -30,7 +30,7 @@ function insertIntoDefaultScenario(text) {
     const $defaultScenario = $("#scenario_pole");
 
     if ($defaultScenario.length === 0) {
-        toastr.warning("Could not find the Scenario field "SillyTavern");
+        toastr.warning("Не удалось найти поле сценария SillyTavern");
         return false;
     }
 
@@ -38,7 +38,7 @@ function insertIntoDefaultScenario(text) {
 
     // Проверяем, есть ли уже точно такой же текст в поле
     if (currentText.includes(text)) {
-        toastr.warning("This text has already been added to Scenario");
+        toastr.warning("Этот сценарий уже добавлен в Scenario");
         return false;
     }
 
@@ -49,7 +49,7 @@ function insertIntoDefaultScenario(text) {
     $defaultScenario.trigger("input");
     $defaultScenario.trigger("change");
 
-    toastr.success("Prompt added to Scenario");
+    toastr.success("Промпт добавлен в Scenario");
     return true;
 }
 
@@ -80,7 +80,7 @@ function removeFromDefaultScenario(text) {
 function updateTokenCounter() {
     const text = $("#new_scenario_text").val() || "";
     const charCount = text.length;
-    $(".token-counter").text(`${charCount} symb.`);
+    $(".token-counter").text(`${charCount} симв.`);
 }
 
 function toggleScenario(scenarioId) {
@@ -88,7 +88,7 @@ function toggleScenario(scenarioId) {
     const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
 
     if (!scenario) {
-        toastr.warning("Scenario not found");
+        toastr.warning("Сценарий не найден");
         return;
     }
 
@@ -98,11 +98,11 @@ function toggleScenario(scenarioId) {
     if (scenario.hidden) {
         // Скрываем - удаляем из дефолтного поля
         removeFromDefaultScenario(scenario.text);
-        toastr.info("Scenario hidden");
+        toastr.info("Сценарий скрыт");
     } else {
         // Показываем - добавляем в дефолтное поле
         insertIntoDefaultScenario(scenario.text);
-        toastr.info("Scenario activated");
+        toastr.info("Сценарий активирован");
     }
 
     saveSettingsDebounced();
@@ -124,9 +124,9 @@ function deleteScenario(scenarioId) {
         extension_settings[extensionName].scenarios = scenarios;
         saveSettingsDebounced();
         renderScenarioList();
-        toastr.info("The Scenario has been removed");
+        toastr.info("Сценарий удалён");
     } else {
-        toastr.warning("Unable to find uninstall Scenario");
+        toastr.warning("Не удалось найти сценарий для удаления");
     }
 }
 
@@ -134,16 +134,16 @@ function editScenario(scenarioId) {
     const scenarios = extension_settings[extensionName].scenarios || [];
     const scenario = scenarios.find(s => String(s.id) === String(scenarioId));
     if (!scenario) {
-        toastr.warning("Scenario not found");
+        toastr.warning("Сценарий не найден");
         return;
     }
 
     const editHtml = `
     <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
-        <h3>Editing a Scenario</h3>
+        <h3>Редактирование сценария</h3>
         <textarea id="edit-scenario-text" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
         <div style="display: flex; justify-content: flex-end;">
-            <button id="edit-save-btn" class="menu_button">Save</button>
+            <button id="edit-save-btn" class="menu_button">Сохранить</button>
         </div>
     </div>
 `;
@@ -155,7 +155,7 @@ function editScenario(scenarioId) {
     $("#edit-save-btn").off("click").on("click", () => {
         const newText = $("#edit-scenario-text").val().trim();
         if (!newText) {
-            toastr.warning("Text cannot be empty");
+            toastr.warning("Текст не может быть пустым");
             return;
         }
 
@@ -171,7 +171,7 @@ function editScenario(scenarioId) {
         scenario.updated = Date.now();
         saveSettingsDebounced();
         renderScenarioList();
-        toastr.success("The Scenario has been updated");
+        toastr.success("Сценарий обновлён");
         $(".popup").remove();
     });
 }
@@ -181,7 +181,7 @@ function renderScenarioList() {
     const scenarios = extension_settings[extensionName].scenarios || [];
 
     if (scenarios.length === 0) {
-        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Scenario list is empty...</p>');
+        $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>');
         return;
     }
 
@@ -200,8 +200,8 @@ function renderScenarioList() {
                     ${safeText}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0; max-width: 120px;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Show' : 'Hide'}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Показать' : 'Скрыть'}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Вставить в Scenario" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
                 </div>
@@ -240,17 +240,17 @@ function showScenarioMenu() {
 <div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
     <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
         <i class="fa-solid fa-puzzle-piece"></i>
-        <span>Scenario management</span>
+        <span>Управление сценариями</span>
     </h3>
 
     <div id="scenario-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid var(--smart-line-color);">
-        <p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Scenario list is empty...</p>
+        <p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Список сценариев пуст...</p>
     </div>
 
     <div class="scenario-edit-area">
         <textarea
             id="new_scenario_text"
-            placeholder="(The context of this dialogue)"
+            placeholder="(Обстоятельства и контекст этого диалога)"
             class="text_pole"
             rows="5"
             style="width: 100%; background: rgba(0,0,0,0.3); color: white; box-sizing: border-box;"
@@ -258,17 +258,17 @@ function showScenarioMenu() {
     </div>
 
     <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0 symb.</span>
+        <span class="token-counter" style="font-size: 0.8em; opacity: 0.6;">0 симв.</span>
         <button id="add_scenario_btn" class="menu_button" style="display: flex; align-items: center; gap: 5px;">
             <i class="fa-solid fa-plus"></i>
-            <span>Add Scenario</span>
+            <span>Добавить сценарий</span>
         </button>
     </div>
 </div>
     `;
 
     callPopup(popupHtml, "text");
-    console.log("Scenario Setup: The window is open");
+    console.log("Scenario Setup: Окно открыто");
 
     loadSettings();
     renderScenarioList();
@@ -277,7 +277,7 @@ function showScenarioMenu() {
         const $textarea = $("#new_scenario_text");
         const text = $textarea.val().trim();
         if (!text) {
-            toastr.warning("Enter script text");
+            toastr.warning("Введите текст сценария");
             return;
         }
 
@@ -293,7 +293,7 @@ function showScenarioMenu() {
         renderScenarioList();
         $textarea.val("");
         updateTokenCounter();
-        toastr.success("Scenario added");
+        toastr.success("Сценарий добавлен");
     });
 
     $("#new_scenario_text").off("input").on("input", updateTokenCounter);
@@ -320,7 +320,7 @@ function injectPuzzleButton() {
             e.stopPropagation();
             showScenarioMenu();
         });
-        console.log("Scenario Setup: Button added");
+        console.log("Scenario Setup: Кнопка добавлена");
     }
 }
 
