@@ -182,7 +182,7 @@ function renderScenarioList() {
     const context = getContext();
     const currentCharacter = context.characters[context.characterId]?.name;
 
-    // Если персонаж не выбран, выводим предупреждение
+    // Если персонаж не выбран
     if (!currentCharacter) {
         $listContainer.html('<p style="opacity: 0.5; font-style: italic; font-size: 0.9em;">Select a character to manage scenarios...</p>');
         return;
@@ -190,7 +190,7 @@ function renderScenarioList() {
 
     const allScenarios = extension_settings[extensionName].scenarios || [];
     
-    // ИСПРАВЛЕНИЕ: Фильтруем список, оставляя только сценарии текущего персонажа
+    // Фильтруем список по текущему персонажу
     const scenarios = allScenarios.filter(s => s.character === currentCharacter);
 
     if (scenarios.length === 0) {
@@ -204,20 +204,28 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
 
-        const words = scenario.text.split(/\s+/).filter(w => w.length > 0);
-        let slice = words.slice(0, 5);
+        // --- ЛОГИКА ОТОБРАЖЕНИЯ НАЗВАНИЯ ---
+        let displayTitle = "";
         
-        if (slice.length > 0) {
-            slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
+        if (scenario.title && scenario.title.trim() !== "") {
+            // Если есть сохраненное название, используем его
+            displayTitle = scenario.title;
+        } else {
+            // Если названия нет (старый сценарий), делаем превью из текста
+            const words = scenario.text.split(/\s+/).filter(w => w.length > 0);
+            let slice = words.slice(0, 5);
+            if (slice.length > 0) {
+                slice[slice.length - 1] = slice[slice.length - 1].replace(/[.,!?;:…\-]+$/, "");
+            }
+            displayTitle = slice.join(' ') + '...';
         }
-        
-        const previewText = slice.join(' ') + '...';
-        const safePreview = escapeHtml(previewText);
+
+        const safeTitle = escapeHtml(displayTitle);
 
         html += `
             <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
                 <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <strong>${safePreview}</strong>
+                    <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="${isHidden ? 'Show' : 'Hide'}" style="cursor: pointer; opacity: 0.7;"></i>
@@ -231,28 +239,23 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Слушатели событий остаются прежними, так как они работают через data-id
+    // Слушатели событий
     $(".toggle-scenario").off("click").on("click", function() {
-        const id = $(this).data("id");
-        toggleScenario(id);
+        toggleScenario($(this).data("id"));
     });
 
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).data("id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
-        if (scenario) {
-            insertIntoDefaultScenario(scenario.text);
-        }
+        if (scenario) insertIntoDefaultScenario(scenario.text);
     });
 
     $(".delete-scenario").off("click").on("click", function() {
-        const id = $(this).data("id");
-        deleteScenario(id);
+        deleteScenario($(this).data("id"));
     });
 
     $(".edit-scenario").off("click").on("click", function() {
-        const id = $(this).data("id");
-        editScenario(id);
+        editScenario($(this).data("id"));
     });
 }
 
