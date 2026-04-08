@@ -142,7 +142,8 @@ function editScenario(scenarioId) {
     <div id="edit-scenario-popup" style="max-width: 90vw; width: 300px; margin: 0 auto;">
         <h3>Editing a Scenario</h3>
         <textarea id="edit-scenario-text" rows="6" style="width: 100%; background: rgba(0,0,0,0.3); color: white; margin: 10px 0; box-sizing: border-box;"></textarea>
-        <div style="display: flex; justify-content: flex-end;">
+        <div style="display: flex; justify-content: space-between;">
+            <button id="edit-back-btn" class="menu_button">Back</button>
             <button id="edit-save-btn" class="menu_button">Save</button>
         </div>
     </div>
@@ -152,12 +153,32 @@ function editScenario(scenarioId) {
 
     $("#edit-scenario-text").val(scenario.text);
 
+    // Кнопка назад — закрываем текущее окно и заново открываем главное меню
+    $("#edit-back-btn").off("click").on("click", () => {
+        $(".popup").remove();
+        showScenarioMenu();
+    });
+
     $("#edit-save-btn").off("click").on("click", () => {
         const newText = $("#edit-scenario-text").val().trim();
         if (!newText) {
             toastr.warning("Text cannot be empty");
             return;
         }
+
+        scenario.text = newText;
+        scenario.updated = Date.now();
+
+        saveSettingsDebounced();
+        renderScenarioList();
+        toastr.success("The Scenario has been updated");
+        
+        // После сохранения тоже возвращаемся в главное меню, чтобы увидеть результат
+        $(".popup").remove();
+        showScenarioMenu();
+    });
+}
+
 
         // ИСПРАВЛЕНИЕ: Теперь мы просто обновляем текст в настройках расширения.
         // Функции removeFromDefaultScenario и insertIntoDefaultScenario здесь больше не вызываются.
