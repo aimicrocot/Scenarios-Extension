@@ -177,6 +177,11 @@ function renderScenarioList() {
         const isAlreadyAdded = existingBlocks.includes(scenario.text.trim());
         const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
 
+        // НОВАЯ ЛОГИКА: Глаз недоступен, если текст еще не добавлен и при этом не скрыт
+        const isEyeDisabled = !isAlreadyAdded && !isHidden;
+        const eyeCursor = isEyeDisabled ? 'not-allowed' : 'pointer';
+        const eyeOpacity = isEyeDisabled ? '0.2' : '0.7';
+
         let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
         const safeTitle = escapeHtml(displayTitle);
 
@@ -186,10 +191,10 @@ function renderScenarioList() {
                     <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" data-disabled="${isEyeDisabled}" style="cursor: ${eyeCursor}; opacity: ${eyeOpacity};" title="${isEyeDisabled ? 'Insert scenario first' : 'Toggle visibility'}"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Insert"></i>
+                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Edit"></i>
+                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Delete"></i>
                 </div>
             </li>
         `;
@@ -203,7 +208,7 @@ function renderScenarioList() {
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             insertIntoDefaultScenario(scenario.text);
-            renderScenarioList(); // Перерисовываем список, чтобы обновить статус (already added)
+            renderScenarioList(); // Перерисовываем список
         }
     });
 
@@ -216,12 +221,17 @@ function renderScenarioList() {
     });
     
     $(".toggle-scenario").off("click").on("click", function() {
+        // Блокируем клик, если кнопка Глаз в статусе "недоступна"
+        if ($(this).attr("data-disabled") === "true") {
+            toastr.warning("Please insert the scenario (Arrow button) before toggling visibility");
+            return;
+        }
+
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             scenario.hidden = !scenario.hidden;
             
-            // ДОБАВЛЕНО: Теперь при скрытии/раскрытии текст физически удаляется или добавляется
             if (scenario.hidden) {
                 removeFromDefaultScenario(scenario.text);
             } else {
