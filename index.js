@@ -32,7 +32,7 @@ function escapeHtml(str) {
 }
 
 function insertIntoDefaultScenario(text) {
-    const $defaultScenario = $("#scenario_pole");
+    const $defaultScenario = $("#scenario_pole, #scenario_field");
 
     if ($defaultScenario.length === 0) {
         toastr.warning("Could not find the Scenario field SillyTavern");
@@ -40,17 +40,17 @@ function insertIntoDefaultScenario(text) {
     }
 
     const currentText = $defaultScenario.val() || "";
+    const trimmedNewText = text.trim();
 
-    // Проверяем, есть ли уже точно такой же текст в поле
-    if (currentText.includes(text)) {
-        toastr.warning("This text has already been added to Scenario");
-        return false;
+    // Просто информируем, но НЕ прерываем выполнение (return false убран)
+    const existingBlocks = currentText.split(/\n/).map(block => block.trim());
+    if (existingBlocks.includes(trimmedNewText)) {
+        toastr.info("Note: This exact text is already in the Scenario");
     }
 
-    // Добавляем промпт (если поле не пустое, добавляем через перенос строки)
-    const newText = currentText.trim() ? currentText + "\n\n" + text : text;
+    const newText = currentText.trim() ? currentText.trim() + "\n\n" + trimmedNewText : trimmedNewText;
+    
     $defaultScenario.val(newText);
-
     $defaultScenario.trigger("input");
     $defaultScenario.trigger("change");
 
@@ -162,11 +162,19 @@ function renderScenarioList() {
         return;
     }
 
+    // Получаем текущий текст из поля сценария для проверки
+    const currentDefaultText = ($("#scenario_pole, #scenario_field").val() || "").trim();
+    const existingBlocks = currentDefaultText.split(/\n/).map(block => block.trim());
+
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
         const isHidden = scenario.hidden || false;
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
+        
+        // ПРОВЕРКА: добавлен ли уже этот конкретный текст
+        const isAlreadyAdded = existingBlocks.includes(scenario.text.trim());
+        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
 
         let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
         const safeTitle = escapeHtml(displayTitle);
@@ -174,7 +182,7 @@ function renderScenarioList() {
         html += `
             <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
                 <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>
+                    <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
@@ -188,11 +196,14 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязываем события через .attr для надежности
+    // Привязка событий (остается прежней)
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
-        if (scenario) insertIntoDefaultScenario(scenario.text);
+        if (scenario) {
+            insertIntoDefaultScenario(scenario.text);
+            renderScenarioList(); // Перерисовываем список, чтобы обновить статус (already added)
+        }
     });
 
     $(".delete-scenario").off("click").on("click", function() {
@@ -203,7 +214,6 @@ function renderScenarioList() {
         editScenario($(this).attr("data-id"));
     });
     
-    // Toggle (скрытие/показ) - добавьте функцию если её нет, или я могу написать
     $(".toggle-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
