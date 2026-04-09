@@ -42,12 +42,23 @@ function insertIntoDefaultScenario(text) {
     const currentText = $defaultScenario.val() || "";
     const trimmedNewText = text.trim();
 
-    // Просто информируем, но НЕ прерываем выполнение (return false убран)
-    const existingBlocks = currentText.split(/\n/).map(block => block.trim());
-    if (existingBlocks.includes(trimmedNewText)) {
-        toastr.info("Note: This exact text is already in the Scenario");
+    if (!trimmedNewText) {
+        toastr.warning("Scenario text is empty");
+        return false;
     }
 
+    // СТРОГАЯ ПРОВЕРКА НА ДУБЛИКАТЫ
+    const escapedForRegex = trimmedNewText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Ищем точное совпадение блока текста
+    const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
+
+    if (blockRegex.test(currentText)) {
+        // Если нашли точное совпадение — выдаем алерт и ПРЕРЫВАЕМ добавление
+        toastr.warning("This exact text is already in the Scenario!");
+        return false; 
+    }
+
+    // Если проверка пройдена (текста нет или он отличается) — добавляем
     const newText = currentText.trim() ? currentText.trim() + "\n\n" + trimmedNewText : trimmedNewText;
     
     $defaultScenario.val(newText);
