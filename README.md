@@ -5,7 +5,6 @@
 
   ### About Extention
 An extension that adds a scenarios tab to allow you to add multiple scenarios to a single bot. 
-
 Now you don't need to make 10 identical bots for different scenarios.
 
 ### What it can do:
@@ -43,7 +42,6 @@ My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 
 ### О расширении
 Позволяет добавлять одному и тому же боту много сценариев и отправлять их в дефолтное окно Scenario в SillyTavern. 
-
 Теперь не надо делать 10 одинаковых ботов под разные сценарии.
 
 ### Что умеет:
