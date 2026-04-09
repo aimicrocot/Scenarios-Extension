@@ -34,7 +34,7 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 4. Besides the Arrow, there will be a Pencil button to edit the scenario text; the Trash can deletes the scenario from the extension window; the Eye erases the scenario from the Scenario window but leaves it in the extension window
 
-5. ### Contacts
+### Contacts
 
 My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 </details>
