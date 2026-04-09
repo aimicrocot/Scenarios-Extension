@@ -27,7 +27,7 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 1. Click the Puzzle button (where the Character Definition is)
 
-2. Enter the scenario text and click the Add Scenario button
+2. Enter the scenario text and click the Add button
 
 3. Click the Arrow button at the top right to send the scenario text as a prompt to the default Scenario window (!)
 
@@ -64,7 +64,7 @@ My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 
 1. Нажмите кнопку Паззл (там, где Определение перса)
 
-2. Введите текст сценария и нажмите на кнопку Добавить
+2. Введите текст сценария и нажмите на кнопку Add
 
 3. Нажмите на кнопку Стрелки справа вверху, чтобы текст сценария отправился промтом в дефолтное окно Scenario (!)
 
