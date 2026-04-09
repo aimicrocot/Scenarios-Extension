@@ -163,7 +163,7 @@ function renderScenarioList() {
         return;
     }
 
-    // Получаем текущий текст из поля сценария для проверки
+    // 1. Сначала получаем текст из поля, чтобы знать, что красить в синий
     const currentDefaultText = ($("#scenario_pole, #scenario_field").val() || "").trim();
     const existingBlocks = currentDefaultText.split(/\n/).map(block => block.trim());
 
@@ -173,11 +173,9 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
         
-        // ПРОВЕРКА: добавлен ли уже этот конкретный текст
+        // Проверяем наличие текста
         const isAlreadyAdded = existingBlocks.includes(scenario.text.trim());
         const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
-        
-        // ЦВЕТ: задаем синий оттенок, если сценарий добавлен, и стандартный, если нет
         const activeColor = isAlreadyAdded ? '#5da5f5' : 'inherit';
 
         let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
@@ -200,13 +198,13 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий
+    // ПРИВЯЗКА СОБЫТИЙ
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             insertIntoDefaultScenario(scenario.text);
-            renderScenarioList(); // Перерисовываем список, чтобы обновить цвета
+            renderScenarioList(); 
         }
     });
 
@@ -224,6 +222,7 @@ function renderScenarioList() {
         if (scenario) {
             scenario.hidden = !scenario.hidden;
 
+            // Синхронизация с полем Scenario
             if (scenario.hidden) {
                 removeFromDefaultScenario(scenario.text);
             } else {
@@ -231,7 +230,11 @@ function renderScenarioList() {
             }
 
             saveSettingsDebounced();
-            renderScenarioList();
+            
+            // Небольшая задержка, чтобы UI Таверны успел обновиться перед перерисовкой списка
+            setTimeout(() => {
+                renderScenarioList();
+            }, 50);
         }
     });
 }
