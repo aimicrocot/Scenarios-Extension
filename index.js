@@ -127,6 +127,7 @@ function editScenario(scenarioId) {
     $("#edit-scenario-text").val(scenario.text || "");
 
     $("#edit-back-btn").off("click").on("click", () => { showScenarioMenu(); });
+    
     $("#edit-save-btn").off("click").on("click", () => {
         const newTitle = $("#edit-scenario-title").val().trim();
         const newText = $("#edit-scenario-text").val().trim();
@@ -134,12 +135,28 @@ function editScenario(scenarioId) {
         if (!newTitle) { toastr.warning("Name cannot be empty"); return; }
         if (!newText) { toastr.warning("Text cannot be empty"); return; }
 
+        // ЗАПОМИНАЕМ СТАРЫЙ ТЕКСТ ПЕРЕД ОБНОВЛЕНИЕМ
+        const oldText = scenario.text;
+
+        // Если старый текст был в поле Scenario персонажа — заменяем его на новый
+        const $field = $("#scenario_pole, #scenario_field");
+        if ($field.length > 0) {
+            let currentContent = $field.val();
+            if (currentContent.includes(oldText)) {
+                // Выполняем замену текста прямо в поле
+                const updatedContent = currentContent.replace(oldText, newText);
+                $field.val(updatedContent).trigger("input").trigger("change");
+                toastr.info("Scenario updated in character field");
+            }
+        }
+
+        // Обновляем данные в расширении
         scenario.title = newTitle;
         scenario.text = newText;
         scenario.updated = Date.now();
 
         saveSettingsDebounced();
-        toastr.success("Updated");
+        toastr.success("Saved and Updated");
         showScenarioMenu(); 
     });
 }
