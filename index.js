@@ -179,9 +179,8 @@ function renderScenarioList() {
         return;
     }
 
-    // 1. Сначала получаем текст из поля, чтобы знать, что красить в синий
+    // Получаем текущий текст из поля сценария целиком
     const currentDefaultText = ($("#scenario_pole, #scenario_field").val() || "").trim();
-    const existingBlocks = currentDefaultText.split(/\n/).map(block => block.trim());
 
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
     scenarios.forEach(scenario => {
@@ -189,8 +188,15 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
         
-        // Проверяем наличие текста
-        const isAlreadyAdded = existingBlocks.includes(scenario.text.trim());
+        // --- УЛУЧШЕННАЯ ПРОВЕРКА НАЛИЧИЯ (для длинных текстов) ---
+        const trimmedText = scenario.text.trim();
+        const escapedForRegex = trimmedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        
+        // Регулярное выражение ищет текст как целый блок (с границами в виде начала строки/двойного переноса)
+        const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
+        const isAlreadyAdded = blockRegex.test(currentDefaultText);
+        // -------------------------------------------------------
+
         const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
         const activeColor = isAlreadyAdded ? '#5da5f5' : 'inherit';
 
@@ -214,7 +220,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // ПРИВЯЗКА СОБЫТИЙ
+    // События
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
@@ -237,20 +243,13 @@ function renderScenarioList() {
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             scenario.hidden = !scenario.hidden;
-
-            // Синхронизация с полем Scenario
             if (scenario.hidden) {
                 removeFromDefaultScenario(scenario.text);
             } else {
                 insertIntoDefaultScenario(scenario.text);
             }
-
             saveSettingsDebounced();
-            
-            // Небольшая задержка, чтобы UI Таверны успел обновиться перед перерисовкой списка
-            setTimeout(() => {
-                renderScenarioList();
-            }, 50);
+            setTimeout(() => { renderScenarioList(); }, 50);
         }
     });
 }
