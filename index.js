@@ -60,20 +60,19 @@ function insertIntoDefaultScenario(text) {
 
 // Добавлена недостающая функция удаления текста из основного поля
 function removeFromDefaultScenario(text) {
-    // Исправлен селектор: теперь он идентичен тому, что используется в insertIntoDefaultScenario
     const $scenarioField = $("#scenario_pole, #scenario_field");
     if ($scenarioField.length === 0) return;
 
-    let currentText = $scenarioField.val() || "";
+    let currentText = $scenarioField.val();
     const targetText = text.trim();
-
-    // Удаляем конкретный кусок текста и лишние переносы строк
     const escapedText = targetText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp('(\\n|^)' + escapedText + '(\\n|$)', 'g');
     
-    currentText = currentText.replace(regex, '$1').trim();
-    
-    $scenarioField.val(currentText).trigger("input").trigger("change");
+    // Ищем текст как отдельный блок
+    const regex = new RegExp('(\\n\\n|^)' + escapedText + '(\\n\\n|$)', 'g');
+    let newText = currentText.replace(regex, '\n\n').trim();
+    newText = newText.replace(/\n{3,}/g, '\n\n');
+
+    $scenarioField.val(newText).trigger("input").trigger("change");
 }
 
 function deleteScenario(scenarioId) {
