@@ -203,21 +203,20 @@ function renderScenarioList() {
         const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
         const isAlreadyAdded = blockRegex.test(currentDefaultText);
 
-        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important;">(already added)</span>' : '';
+        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important; white-space: nowrap;">(already added)</span>' : '';
         const activeStyle = isAlreadyAdded 
             ? 'color: var(--main-text-color); filter: brightness(1.5); font-weight: bold;' 
             : 'color: var(--main-text-color); opacity: 0.8;';
 
-        // --- НОВАЯ ЛОГИКА ОЧИСТКИ ЗАГОЛОВКА ---
+        // --- ОБНОВЛЕННАЯ ЛОГИКА ЗАГОЛОВКА ---
         let rawTitle = scenario.title || scenario.text;
         let displayTitle = rawTitle;
 
-        if (rawTitle.length > 20) {
-            // 1. Берем первые 20 символов
-            displayTitle = rawTitle.substring(0, 20);
-            // 2. Удаляем знаки препинания и пробелы в конце этой строки
+        // Увеличиваем порог до 40 символов для более длинных названий
+        if (rawTitle.length > 40) {
+            displayTitle = rawTitle.substring(0, 40);
+            // Удаляем знаки препинания в конце перед многоточием
             displayTitle = displayTitle.replace(/[.,!?;:\-—\s]+$/, "");
-            // 3. Добавляем многоточие
             displayTitle += "...";
         }
         // ---------------------------------------
@@ -225,14 +224,17 @@ function renderScenarioList() {
         const safeTitle = escapeHtml(displayTitle);
 
         html += `
-            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
-                <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <strong style="${activeStyle} transition: all 0.2s;" title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 12px;">
+                <div style="flex: 1; min-width: 0; text-align: left; display: flex; align-items: center; overflow: hidden;">
+                    <strong style="${activeStyle} transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${escapeHtml(scenario.text)}">
+                        ${safeTitle}
+                    </strong>
+                    ${addedBadge}
                 </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="Toggle in Scenario" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; ${activeStyle} transition: all 0.2s;"></i>
-                    <i class="fa-regular fa-copy copy-scenario" data-id="${scenario.id}" title="Copy to clipboard" style="cursor: pointer; opacity: 0.7;"></i>
+                <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="Toggle" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Insert" style="cursor: pointer; ${activeStyle} transition: all 0.2s;"></i>
+                    <i class="fa-regular fa-copy copy-scenario" data-id="${scenario.id}" title="Copy" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" title="Edit" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" title="Delete" style="cursor: pointer; opacity: 0.7;"></i>
                 </div>
@@ -242,15 +244,13 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Привязка событий (без изменений)
+    // События (копирование, вставка, удаление, ред., глаз) остаются без изменений
     $(".copy-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             navigator.clipboard.writeText(scenario.text).then(() => {
-                toastr.success("Scenario text copied!");
-            }).catch(() => {
-                toastr.error("Failed to copy");
+                toastr.success("Copied!");
             });
         }
     });
@@ -277,11 +277,8 @@ function renderScenarioList() {
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             scenario.hidden = !scenario.hidden;
-            if (scenario.hidden) {
-                removeFromDefaultScenario(scenario.text);
-            } else {
-                insertIntoDefaultScenario(scenario.text);
-            }
+            if (scenario.hidden) removeFromDefaultScenario(scenario.text);
+            else insertIntoDefaultScenario(scenario.text);
             saveSettingsDebounced();
             setTimeout(() => { renderScenarioList(); }, 50);
         }
