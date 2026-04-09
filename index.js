@@ -179,7 +179,6 @@ function renderScenarioList() {
         return;
     }
 
-    // Получаем текущий текст из поля сценария целиком
     const currentDefaultText = ($("#scenario_pole, #scenario_field").val() || "").trim();
 
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
@@ -188,14 +187,10 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
         
-        // --- УЛУЧШЕННАЯ ПРОВЕРКА НАЛИЧИЯ (для длинных текстов) ---
         const trimmedText = scenario.text.trim();
         const escapedForRegex = trimmedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        
-        // Регулярное выражение ищет текст как целый блок (с границами в виде начала строки/двойного переноса)
         const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
         const isAlreadyAdded = blockRegex.test(currentDefaultText);
-        // -------------------------------------------------------
 
         const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
         const activeColor = isAlreadyAdded ? '#5da5f5' : 'inherit';
@@ -209,10 +204,11 @@ function renderScenarioList() {
                     <strong style="color: ${activeColor}; transition: color 0.2s;" title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7; color: ${activeColor}; transition: color 0.2s;"></i>
-                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="Toggle in Scenario" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7; color: ${activeColor}; transition: color 0.2s;"></i>
+                    <i class="fa-regular fa-copy copy-scenario" data-id="${scenario.id}" title="Copy to clipboard" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" title="Edit" style="cursor: pointer; opacity: 0.7;"></i>
+                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" title="Delete" style="cursor: pointer; opacity: 0.7;"></i>
                 </div>
             </li>
         `;
@@ -220,7 +216,20 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // События
+    // СОБЫТИЕ: Копирование в буфер обмена
+    $(".copy-scenario").off("click").on("click", function() {
+        const id = $(this).attr("data-id");
+        const scenario = allScenarios.find(s => String(s.id) === String(id));
+        if (scenario) {
+            navigator.clipboard.writeText(scenario.text).then(() => {
+                toastr.success("Scenario text copied!");
+            }).catch(() => {
+                toastr.error("Failed to copy");
+            });
+        }
+    });
+
+    // Остальные события
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
