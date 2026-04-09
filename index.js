@@ -203,16 +203,25 @@ function renderScenarioList() {
         const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
         const isAlreadyAdded = blockRegex.test(currentDefaultText);
 
-        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important;">(added)</span>' : '';
-        
-        // АДАПТИВНЫЙ СТИЛЬ: 
-        // Если добавлен: используем основной цвет текста темы + повышаем яркость на 50%
-        // Если нет: используем стандартный цвет с небольшой прозрачностью для контраста
+        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important;">(already added)</span>' : '';
         const activeStyle = isAlreadyAdded 
             ? 'color: var(--main-text-color); filter: brightness(1.5); font-weight: bold;' 
             : 'color: var(--main-text-color); opacity: 0.8;';
 
-        let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
+        // --- НОВАЯ ЛОГИКА ОЧИСТКИ ЗАГОЛОВКА ---
+        let rawTitle = scenario.title || scenario.text;
+        let displayTitle = rawTitle;
+
+        if (rawTitle.length > 20) {
+            // 1. Берем первые 20 символов
+            displayTitle = rawTitle.substring(0, 20);
+            // 2. Удаляем знаки препинания и пробелы в конце этой строки
+            displayTitle = displayTitle.replace(/[.,!?;:\-—\s]+$/, "");
+            // 3. Добавляем многоточие
+            displayTitle += "...";
+        }
+        // ---------------------------------------
+
         const safeTitle = escapeHtml(displayTitle);
 
         html += `
@@ -233,7 +242,7 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // События (копирование, вставка, удаление, ред., глаз) - без изменений
+    // Привязка событий (без изменений)
     $(".copy-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
