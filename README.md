@@ -10,15 +10,15 @@ Now you don't need to make 10 identical bots for different scenarios.
 
 ### What it can do:
 
-— Add/delete/edit scenario texts; they go into the default SillyTavern field named Scenario
+- Add/delete/edit scenario texts; they go into the default SillyTavern field named Scenario
 
-— Toggle the visibility of scenario texts; hidden ones will be erased from the default Scenario window (but remain in the extension window itself)
+- Toggle the visibility of scenario texts; hidden ones will be erased from the default Scenario window (but remain in the extension window itself)
 
-— Combine scenarios: if you add multiple texts, they will appear together in the Scenario field
+- Combine scenarios: if you add multiple texts, they will appear together in the Scenario field
 
-— Count the number of symbols entered
+- Count the number of symbols entered
 
-— Adapt to the theme appearance
+- Adapt to the theme appearance
 
 ### Installation
 
@@ -48,15 +48,15 @@ My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 
 ### Что умеет:
 
-— Добавлять/удалять/редактировать тексты сценариев, идёт в дефолтное поле SillyTavern с названием Scenario 
+- Добавлять/удалять/редактировать тексты сценариев, идёт в дефолтное поле SillyTavern с названием Scenario 
 
-— Вкл/выкл видимость текстов сценариев, скрытые сотрутся из дефолтного Scenario (но останутся в самом окошке расширения)
+- Вкл/выкл видимость текстов сценариев, скрытые сотрутся из дефолтного Scenario (но останутся в самом окошке расширения)
 
-— Объединять сценарии: если добавите несколько текстов, они отобразятся вместе по порядку добавления в Scenario
+- Объединять сценарии: если добавите несколько текстов, они отобразятся вместе по порядку добавления в Scenario
 
-— Считать кол-во введённых символов
+- Считать кол-во введённых символов
 
-— Подстраиваться под вид темы
+- Подстраиваться под вид темы
 
 ### Установка
 
