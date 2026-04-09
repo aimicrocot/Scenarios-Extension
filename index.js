@@ -203,7 +203,7 @@ function renderScenarioList() {
         const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
         const isAlreadyAdded = blockRegex.test(currentDefaultText);
 
-        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important;">(already added)</span>' : '';
+        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important;">(added)</span>' : '';
         
         // АДАПТИВНЫЙ СТИЛЬ: 
         // Если добавлен: используем основной цвет текста темы + повышаем яркость на 50%
