@@ -192,13 +192,10 @@ function renderScenarioList() {
         const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
         const isAlreadyAdded = blockRegex.test(currentDefaultText);
 
-        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important; text-shadow: none !important;">(already added)</span>' : '';
+        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
         
-        // --- НОВАЯ ЛОГИКА СВЕЧЕНИЯ ---
-        // Если добавлен: увеличиваем яркость и добавляем тень того же цвета (currentColor)
-        const activeEffect = isAlreadyAdded 
-            ? 'filter: brightness(1.5); text-shadow: 0 0 8px currentColor, 0 0 12px currentColor; opacity: 1 !important;' 
-            : '';
+        // ОБНОВЛЕННЫЙ ЦВЕТ: Светло-голубой
+        const activeColor = isAlreadyAdded ? '#add8e6' : 'inherit';
 
         let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
         const safeTitle = escapeHtml(displayTitle);
@@ -206,11 +203,11 @@ function renderScenarioList() {
         html += `
             <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
                 <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <strong style="${activeEffect} transition: all 0.3s ease;" title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
+                    <strong style="color: ${activeColor}; transition: color 0.2s;" title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
                 </div>
                 <div style="display: flex; gap: 8px; flex-shrink: 0;">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="Toggle in Scenario" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7; ${activeEffect} transition: all 0.3s ease;"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Add to Scenario" style="cursor: pointer; opacity: 0.7; color: ${activeColor}; transition: color 0.2s;"></i>
                     <i class="fa-regular fa-copy copy-scenario" data-id="${scenario.id}" title="Copy to clipboard" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" title="Edit" style="cursor: pointer; opacity: 0.7;"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" title="Delete" style="cursor: pointer; opacity: 0.7;"></i>
@@ -221,17 +218,20 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // Обработчики кликов
+    // Копирование
     $(".copy-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             navigator.clipboard.writeText(scenario.text).then(() => {
                 toastr.success("Scenario text copied!");
+            }).catch(() => {
+                toastr.error("Failed to copy");
             });
         }
     });
 
+    // Вставка
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
