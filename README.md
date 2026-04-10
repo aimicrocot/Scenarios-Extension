@@ -76,7 +76,7 @@ My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 
 ### Вдохновлено
 
-Дмзайн вдохновлён отчасти этим расширением: https://github.com/bmen25124/SillyTavern-Custom-Scenario
+Дизайн вдохновлён отчасти этим расширением: https://github.com/bmen25124/SillyTavern-Custom-Scenario
 
 ### Контакты
 
