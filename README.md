@@ -33,6 +33,10 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 4. Besides the Arrow, there will be a Pencil button to edit the scenario text; the Trash can deletes the scenario from the extension window; the Eye erases the scenario from the Scenario window but leaves it in the extension window
 
+### Inspired by
+
+The design is partially inspired by this extension: https://github.com/bmen25124/SillyTavern-Custom-Scenario
+
 ### Contacts
 
 My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
@@ -69,6 +73,10 @@ My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 3. Нажмите на кнопку Стрелки справа вверху, чтобы текст сценария отправился промтом в дефолтное окно Scenario (!)
 
 4. Кроме Стрелки будет кнопка Карандаш, позволяет редачить текст сценария; Корзина удаляет сценарий из окна расширения; Глаз стирает сценарий из окна Scenario, но оставляет в окне расширения
+
+### Вдохновлено
+
+Дмзайн вдохновлён отчасти этим расширением: https://github.com/bmen25124/SillyTavern-Custom-Scenario
 
 ### Контакты
 
