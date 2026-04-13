@@ -190,6 +190,7 @@ function renderScenarioList() {
         return;
     }
 
+    // Получаем текущий текст целиком
     const currentDefaultText = ($("#scenario_pole, #scenario_field").val() || "").trim();
 
     let html = '<ul style="margin: 0; padding-left: 1.2em;">';
@@ -198,45 +199,34 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
         
-        const trimmedText = scenario.text.trim();
-        const escapedForRegex = trimmedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
-        const isAlreadyAdded = blockRegex.test(currentDefaultText);
+        // Проверяем вхождение текста целиком через includes
+        const scenarioTextTrimmed = scenario.text.trim();
+        const isAlreadyAdded = currentDefaultText.includes(scenarioTextTrimmed);
+        
+        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
 
-        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal; filter: none !important; white-space: nowrap;">(already added)</span>' : '';
-        const activeStyle = isAlreadyAdded 
-            ? 'color: var(--main-text-color); filter: brightness(1.5); font-weight: bold;' 
-            : 'color: var(--main-text-color); opacity: 0.8;';
+        // Блокировка глаза
+        const isEyeDisabled = !isAlreadyAdded && !isHidden;
+        const eyeCursor = isEyeDisabled ? 'not-allowed' : 'pointer';
+        const eyeOpacity = isEyeDisabled ? '0.15' : '0.7';
 
-        // --- ОБНОВЛЕННАЯ ЛОГИКА ЗАГОЛОВКА ---
-        let rawTitle = scenario.title || scenario.text;
-        let displayTitle = rawTitle;
-
-        // Увеличиваем порог до 40 символов для более длинных названий
-        if (rawTitle.length > 40) {
-            displayTitle = rawTitle.substring(0, 40);
-            // Удаляем знаки препинания в конце перед многоточием
-            displayTitle = displayTitle.replace(/[.,!?;:\-—\s]+$/, "");
-            displayTitle += "...";
-        }
-        // ---------------------------------------
-
+        let displayTitle = scenario.title || (scenario.text.substring(0, 20) + "...");
         const safeTitle = escapeHtml(displayTitle);
 
         html += `
-            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 12px;">
-                <div style="flex: 1; min-width: 0; text-align: left; display: flex; align-items: center; overflow: hidden;">
-                    <strong style="${activeStyle} transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" title="${escapeHtml(scenario.text)}">
-                        ${safeTitle}
-                    </strong>
-                    ${addedBadge}
+            <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: ${opacity}; gap: 8px;">
+                <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
                 </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
-                    <i class="fa-solid ${eyeIcon} toggle-scenario" data-id="${scenario.id}" title="Toggle" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" title="Insert" style="cursor: pointer; ${activeStyle} transition: all 0.2s;"></i>
-                    <i class="fa-regular fa-copy copy-scenario" data-id="${scenario.id}" title="Copy" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" title="Edit" style="cursor: pointer; opacity: 0.7;"></i>
-                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" title="Delete" style="cursor: pointer; opacity: 0.7;"></i>
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <i class="fa-solid ${eyeIcon} toggle-scenario" 
+                       data-id="${scenario.id}" 
+                       data-disabled="${isEyeDisabled}" 
+                       style="cursor: ${eyeCursor}; opacity: ${eyeOpacity};" 
+                       title="${isEyeDisabled ? 'Insert scenario first' : 'Toggle visibility'}"></i>
+                    <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Insert"></i>
+                    <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Edit"></i>
+                    <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Delete"></i>
                 </div>
             </li>
         `;
@@ -244,43 +234,53 @@ function renderScenarioList() {
     html += '</ul>';
     $listContainer.html(html);
 
-    // События (копирование, вставка, удаление, ред., глаз) остаются без изменений
-    $(".copy-scenario").off("click").on("click", function() {
-        const id = $(this).attr("data-id");
-        const scenario = allScenarios.find(s => String(s.id) === String(id));
-        if (scenario) {
-            navigator.clipboard.writeText(scenario.text).then(() => {
-                toastr.success("Copied!");
-            });
-        }
-    });
-
+    // Привязка событий (Insert)
     $(".insert-scenario").off("click").on("click", function() {
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
+            // НОВАЯ ЛОГИКА: Если сценарий был скрыт, возвращаем ему статус видимого
+            if (scenario.hidden) {
+                scenario.hidden = false;
+                saveSettingsDebounced();
+            }
+            
+            // Пытаемся добавить текст (ваша функция сама разберется с дубликатами)
             insertIntoDefaultScenario(scenario.text);
+            
+            // Перерисовываем интерфейс (Глаз обновится автоматически)
             renderScenarioList(); 
         }
     });
 
+    // Привязка событий (Delete)
     $(".delete-scenario").off("click").on("click", function() {
         deleteScenario($(this).attr("data-id"));
     });
 
+    // Привязка событий (Edit)
     $(".edit-scenario").off("click").on("click", function() {
         editScenario($(this).attr("data-id"));
     });
     
+    // Привязка событий (Toggle/Eye)
     $(".toggle-scenario").off("click").on("click", function() {
+        if ($(this).attr("data-disabled") === "true") {
+            toastr.info("Please use the Arrow button to add this scenario first");
+            return;
+        }
+
         const id = $(this).attr("data-id");
         const scenario = allScenarios.find(s => String(s.id) === String(id));
         if (scenario) {
             scenario.hidden = !scenario.hidden;
-            if (scenario.hidden) removeFromDefaultScenario(scenario.text);
-            else insertIntoDefaultScenario(scenario.text);
+            if (scenario.hidden) {
+                removeFromDefaultScenario(scenario.text);
+            } else {
+                insertIntoDefaultScenario(scenario.text);
+            }
             saveSettingsDebounced();
-            setTimeout(() => { renderScenarioList(); }, 50);
+            renderScenarioList();
         }
     });
 }
