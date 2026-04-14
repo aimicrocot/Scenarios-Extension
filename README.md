@@ -1,4 +1,4 @@
-# Scenarios Extension for SillyTavern
+# Scenarios Extension
 
 ## Eng ReadMe
 <details>
