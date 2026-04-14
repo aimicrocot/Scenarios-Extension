@@ -339,7 +339,7 @@ function showScenarioMenu() {
     const popupHtml = `
 <div id="scenario-manager-window" style="min-width: 300px; max-width: 90vw;">
     <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-        <i class="fa-solid fa-puzzle-piece"></i>
+        <i class="fa-solid fa-book-open"></i>
         <span>Scenario Management</span>
     </h3>
 
@@ -402,7 +402,7 @@ function injectPuzzleButton() {
         const buttonContainer = targetButton.parent();
         const puzzleButton = $(`
             <div id="scenario-setup-button"
-                 class="menu_button fa-solid fa-puzzle-piece interactable"
+                 class="menu_button fa-solid fa-book-open interactable"
                  title="Scenario Setup"
                  tabindex="0"
                  role="button"
