@@ -25,7 +25,7 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 ### How to use:
 
-1. Click the Puzzle button (where the Character Definition is)
+1. Click the button with the open book icon (where the Character Definition is)
 
 2. Enter the scenario text and click the Add button
 
@@ -33,13 +33,10 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 4. Besides the Arrow, there will be a Pencil button to edit the scenario text; the Trash can deletes the scenario from the extension window; the Eye erases the scenario from the Scenario window but leaves it in the extension window
 
-### Inspired by
-
-The design is partially inspired by this extension: https://github.com/bmen25124/SillyTavern-Custom-Scenario
-
 ### Contacts
 
 My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
+My small personal website featuring my preset, extensions for SillyTavern, and more: [MicroCot](https://aimicrocot.github.io/)
 </details>
 
 ## Прочти меня
@@ -66,7 +63,7 @@ My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 
 ### Как пользоваться:
 
-1. Нажмите кнопку Паззл (там, где Определение перса)
+1. Нажмите кнопку с иконкой открытой книги (там, где Определение персонажа)
 
 2. Введите текст сценария и нажмите на кнопку Add
 
@@ -74,11 +71,8 @@ My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
 
 4. Кроме Стрелки будет кнопка Карандаш, позволяет редачить текст сценария; Корзина удаляет сценарий из окна расширения; Глаз стирает сценарий из окна Scenario, но оставляет в окне расширения
 
-### Вдохновлено
-
-Дизайн вдохновлён отчасти этим расширением: https://github.com/bmen25124/SillyTavern-Custom-Scenario
-
 ### Контакты
 
 Мой Телеграм-канал [@sillytavern1](https://t.me/sillytavern1)
+Мой маленький сайт-визитка с моим пресетом, расширениями для SillyTavern и т.д. [MicroCot](https://aimicrocot.github.io/)
 
