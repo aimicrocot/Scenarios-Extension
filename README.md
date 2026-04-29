@@ -25,7 +25,7 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 ### How to use:
 
-1. Click the button with the open book icon (where the Character Definition is)
+1. Click the button with the Open book icon (where the Character Definition is)
 
 2. Enter the scenario text and click the Add button
 
@@ -64,7 +64,7 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 ### Как пользоваться:
 
-1. Нажмите кнопку с иконкой открытой книги (там, где Определение персонажа)
+1. Нажмите кнопку с иконкой Открытой книги (там, где Определение персонажа)
 
 2. Введите текст сценария и нажмите на кнопку Add
 
