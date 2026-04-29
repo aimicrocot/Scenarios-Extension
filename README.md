@@ -35,8 +35,8 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 
 ### Contacts
 
-My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
-My small personal website featuring my preset, extensions for SillyTavern, and more: [MicroCot](https://aimicrocot.github.io/)
+- My Telegram-channel [@sillytavern1](https://t.me/sillytavern1)
+- My small personal website featuring my preset, extensions for SillyTavern, and more: [MicroCot](https://aimicrocot.github.io/)
 </details>
 
 ## Прочти меня
@@ -73,6 +73,6 @@ My small personal website featuring my preset, extensions for SillyTavern, and m
 
 ### Контакты
 
-Мой Телеграм-канал [@sillytavern1](https://t.me/sillytavern1)
-Мой маленький сайт-визитка с моим пресетом, расширениями для SillyTavern и т.д. [MicroCot](https://aimicrocot.github.io/)
+- Мой Телеграм-канал [@sillytavern1](https://t.me/sillytavern1)
+- Мой маленький сайт-визитка с моим пресетом, расширениями для SillyTavern и т.д. [MicroCot](https://aimicrocot.github.io/)
 
