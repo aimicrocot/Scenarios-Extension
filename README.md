@@ -1,5 +1,9 @@
 # Scenarios Extension
 
+<p align="left">
+  <img src="scenarios.png" alt="Scenarios Extension Preview" width="800"/>
+</p>
+
 ## Eng ReadMe
 <details>
 
