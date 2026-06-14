@@ -1,8 +1,8 @@
 {
-  "display_name": "Scenario Setup",
+  "display_name": "Scenarios Extention",
   "loading_order": 100,
   "js": "index.js",
   "css": "style.css",
-  "author": "MicroCot",
+  "author": "MicroCoT",
   "version": "1.1.0"
 }
