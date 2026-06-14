@@ -187,7 +187,7 @@ function renderScenarioList() {
         const scenarioTextTrimmed = scenario.text.trim();
         const isAlreadyAdded = currentDefaultText.includes(scenarioTextTrimmed);
         
-        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; color: gray; margin-left: 8px; font-weight: normal;">(already added)</span>' : '';
+        const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; margin-left: 8px; font-weight: normal;">(added)</span>' : '';
 
         // Блокировка глаза
         const isEyeDisabled = !isAlreadyAdded && !isHidden;
