@@ -64,3 +64,12 @@
     color: #ffaa44;
     opacity: 1;
 }
+
+#scenario-manager-window .copy-scenario:hover {
+    color: #ffdd44;
+    opacity: 1;
+}
+#scenario-list .copy-scenario:hover {
+    color: #ffdd44;
+    opacity: 1;
+}
