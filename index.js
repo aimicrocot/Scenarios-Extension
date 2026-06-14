@@ -202,7 +202,7 @@ function renderScenarioList() {
                 <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <strong title="${escapeHtml(scenario.text)}">${safeTitle}</strong>${addedBadge}
                 </div>
-                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                <div style="display: flex; gap: 8px; flex-shrink: 0; margin-right: 8px;">
                     <i class="fa-solid ${eyeIcon} toggle-scenario" 
                        data-id="${scenario.id}" 
                        data-disabled="${isEyeDisabled}" 
