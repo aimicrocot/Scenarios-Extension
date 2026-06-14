@@ -209,6 +209,7 @@ function renderScenarioList() {
                        style="cursor: ${eyeCursor}; opacity: ${eyeOpacity};" 
                        title="${isEyeDisabled ? 'Insert scenario first' : 'Toggle visibility'}"></i>
                     <i class="fa-solid fa-arrow-right insert-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Insert"></i>
+                    <i class="fa-solid fa-copy copy-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Copy"></i>
                     <i class="fa-solid fa-pencil edit-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Edit"></i>
                     <i class="fa-solid fa-trash-can delete-scenario" data-id="${scenario.id}" style="cursor: pointer; opacity: 0.7;" title="Delete"></i>
                 </div>
@@ -245,6 +246,19 @@ function renderScenarioList() {
     // Привязка событий (Edit)
     $(".edit-scenario").off("click").on("click", function() {
         editScenario($(this).attr("data-id"));
+    });
+
+     // Привязка событий (Copy)
+    $(".copy-scenario").off("click").on("click", function() {
+        const id = $(this).attr("data-id");
+        const scenario = allScenarios.find(s => String(s.id) === String(id));
+        if (scenario) {
+            navigator.clipboard.writeText(scenario.text).then(() => {
+                toastr.success("Copied to clipboard");
+            }).catch(() => {
+                toastr.warning("Failed to copy");
+            });
+        }
     });
     
     // Привязка событий (Toggle/Eye)
