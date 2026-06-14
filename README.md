@@ -19,8 +19,6 @@ Now you don't need to make 10 identical bots for different scenarios.
 
 - Combine scenarios: if you add multiple texts, they will appear together in the Scenario field
 
-- Count the number of symbols entered
-
 - Adapt to the theme appearance
 
 ### Installation
@@ -57,8 +55,6 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 - Вкл/выкл видимость текстов сценариев, скрытые сотрутся из дефолтного Scenario (но останутся в самом окошке расширения)
 
 - Объединять сценарии: если добавите несколько текстов, они отобразятся вместе по порядку добавления в Scenario
-
-- Считать кол-во введённых символов
 
 - Подстраиваться под вид темы
 
