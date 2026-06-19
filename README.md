@@ -17,8 +17,6 @@ Now you don't need to make 10 identical bots for different scenarios.
 
 - Toggle the visibility of scenario texts; hidden ones will be erased from the default Scenario window (but remain in the extension window itself)
 
-- Combine scenarios: if you add multiple texts, they will appear together in the Scenario field
-
 - Adapt to the theme appearance
 
 ### Installation
@@ -53,8 +51,6 @@ Copy the repository link and add the extension via the SillyTavern extensions me
 - Добавлять/удалять/редактировать тексты сценариев, идёт в дефолтное поле SillyTavern с названием Scenario 
 
 - Вкл/выкл видимость текстов сценариев, скрытые сотрутся из дефолтного Scenario (но останутся в самом окошке расширения)
-
-- Объединять сценарии: если добавите несколько текстов, они отобразятся вместе по порядку добавления в Scenario
 
 - Подстраиваться под вид темы
 
