@@ -39,7 +39,6 @@ function insertIntoDefaultScenario(text) {
         return false;
     }
 
-    const currentText = $defaultScenario.val() || "";
     const trimmedNewText = text.trim();
 
     if (!trimmedNewText) {
@@ -47,25 +46,12 @@ function insertIntoDefaultScenario(text) {
         return false;
     }
 
-    // СТРОГАЯ ПРОВЕРКА НА ДУБЛИКАТЫ
-    const escapedForRegex = trimmedNewText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Ищем точное совпадение блока текста
-    const blockRegex = new RegExp('(^|\\n\\n)' + escapedForRegex + '(\\n\\n|$)', 'g');
-
-    if (blockRegex.test(currentText)) {
-        // Если нашли точное совпадение — выдаем алерт и ПРЕРЫВАЕМ добавление
-        toastr.warning("This exact text is already in the Scenario!");
-        return false; 
-    }
-
-    // Если проверка пройдена (текста нет или он отличается) — добавляем
-    const newText = currentText.trim() ? currentText.trim() + "\n\n" + trimmedNewText : trimmedNewText;
-    
-    $defaultScenario.val(newText);
+    // Полностью заменяем содержимое поля Scenario новым текстом
+    $defaultScenario.val(trimmedNewText);
     $defaultScenario.trigger("input");
     $defaultScenario.trigger("change");
 
-    toastr.success("Prompt added to Scenario");
+    toastr.success("Scenario set");
     return true;
 }
 
@@ -74,16 +60,13 @@ function removeFromDefaultScenario(text) {
     const $scenarioField = $("#scenario_pole, #scenario_field");
     if ($scenarioField.length === 0) return;
 
-    let currentText = $scenarioField.val();
+    const currentText = ($scenarioField.val() || "").trim();
     const targetText = text.trim();
-    const escapedText = targetText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    
-    // Ищем текст как отдельный блок
-    const regex = new RegExp('(\\n\\n|^)' + escapedText + '(\\n\\n|$)', 'g');
-    let newText = currentText.replace(regex, '\n\n').trim();
-    newText = newText.replace(/\n{3,}/g, '\n\n');
 
-    $scenarioField.val(newText).trigger("input").trigger("change");
+    // Очищаем поле, только если оно содержит именно этот сценарий
+    if (currentText === targetText) {
+        $scenarioField.val("").trigger("input").trigger("change");
+    }
 }
 
 function deleteScenario(scenarioId) {
@@ -183,9 +166,9 @@ function renderScenarioList() {
         const eyeIcon = isHidden ? 'fa-eye-slash' : 'fa-eye';
         const opacity = isHidden ? '0.4' : '1';
         
-        // Проверяем вхождение текста целиком через includes
+        /// Сравниваем текст целиком — в поле теперь может быть только один сценарий
         const scenarioTextTrimmed = scenario.text.trim();
-        const isAlreadyAdded = currentDefaultText.includes(scenarioTextTrimmed);
+        const isAlreadyAdded = currentDefaultText === scenarioTextTrimmed;
         
         const addedBadge = isAlreadyAdded ? '<span style="font-size: 0.7em; margin-left: 8px; font-weight: normal;">(added)</span>' : '';
 
